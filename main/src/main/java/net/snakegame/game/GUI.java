@@ -10,6 +10,7 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -29,16 +30,19 @@ import java.util.EnumSet;
 public class GUI extends GameApplication {
     private Entity player;
     private Button endGameButton;
+    private Text scoreText;
+    private int score = 0;
     private KeyCode upKey = KeyCode.W;
     private KeyCode downKey = KeyCode.S;
     private KeyCode leftKey = KeyCode.A;
     private KeyCode rightKey = KeyCode.D;
     private static boolean isMusicOn = true;
     private static boolean isSoundOn = true;
+    private static String selectedSize = "Medium";
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setWidth(1000);
+        settings.setWidth(1200);
         settings.setHeight(800);
         settings.setTitle("Snake Game");
         settings.setMainMenuEnabled(true);
@@ -64,8 +68,6 @@ public class GUI extends GameApplication {
             menuBox = new VBox(15);
             menuBox.setAlignment(Pos.CENTER);
             showMainMenu();
-
-            // Add key event handler for the entire menu
             getContentRoot().setOnKeyPressed(this::handleKeyPress);
         }
 
@@ -74,7 +76,6 @@ public class GUI extends GameApplication {
                 KeyCode pressedKey = event.getCode();
                 GUI mainInstance = (GUI) FXGL.getApp();
 
-                // Update the appropriate key binding
                 if (waitingForKey.getUserData().equals("up")) {
                     mainInstance.upKey = pressedKey;
                     waitingText.setText("Up: " + pressedKey.getName());
@@ -89,11 +90,9 @@ public class GUI extends GameApplication {
                     waitingText.setText("Right: " + pressedKey.getName());
                 }
 
-                // Reset waiting state
                 waitingForKey.setStyle(createNormalControlStyle());
                 waitingForKey = null;
                 waitingText = null;
-
                 event.consume();
             }
         }
@@ -139,6 +138,45 @@ public class GUI extends GameApplication {
             btnSound.setText("Sound: " + (isSoundOn ? "ON" : "OFF"));
         }
 
+        private void showOptionsMenu() {
+            menuBox.getChildren().clear();
+
+            Text optionsTitle = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 32);
+
+            Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
+            btnSound.setOnAction(e -> soundControl(btnSound));
+
+            Button btnMusic = createSnakeButton("Music: " + (isMusicOn ? "ON" : "OFF"));
+            btnMusic.setOnAction(e -> musicControl(btnMusic));
+
+            ComboBox<String> sizeSelector = new ComboBox<>();
+            sizeSelector.getItems().addAll("Small", "Medium", "Large");
+            sizeSelector.setValue(selectedSize);
+            sizeSelector.setStyle(
+                    "-fx-background-color: #006400;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-font-size: 14px;"
+            );
+            sizeSelector.setOnAction(e -> selectedSize = sizeSelector.getValue());
+
+            Button btnControls = createSnakeButton("Controls");
+            btnControls.setOnAction(e -> showControlsMenu());
+
+            Button btnBack = createSnakeButton("Back");
+            btnBack.setOnAction(e -> showMainMenu());
+
+            menuBox.getChildren().addAll(
+                    optionsTitle,
+                    createSeparator(),
+                    btnSound,
+                    btnMusic,
+                    sizeSelector,
+                    btnControls,
+                    createSeparator(),
+                    btnBack
+            );
+        }
+
         private void showControlsMenu() {
             menuBox.getChildren().clear();
 
@@ -146,18 +184,16 @@ public class GUI extends GameApplication {
 
             GUI mainInstance = (GUI) FXGL.getApp();
 
-            // Create control buttons
             VBox controlsBox = new VBox(20);
             controlsBox.setAlignment(Pos.CENTER);
 
-            // Controls
             HBox upControl = createControlButton("Up", mainInstance.upKey, "up");
             HBox downControl = createControlButton("Down", mainInstance.downKey, "down");
             HBox leftControl = createControlButton("Left", mainInstance.leftKey, "left");
             HBox rightControl = createControlButton("Right", mainInstance.rightKey, "right");
 
             Button btnBack = createSnakeButton("Back");
-            btnBack.setOnAction(e -> showMainMenu());
+            btnBack.setOnAction(e -> showOptionsMenu());
 
             controlsBox.getChildren().addAll(
                     upControl,
@@ -216,55 +252,6 @@ public class GUI extends GameApplication {
                     "-fx-border-width: 2px;";
         }
 
-        private void showOptionsMenu() {
-            menuBox.getChildren().clear();
-
-            Text optionsTitle = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 32);
-
-            Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
-            btnSound.setOnAction(e -> soundControl(btnSound));
-
-            Button btnMusic = createSnakeButton("Music: " + (isMusicOn ? "ON" : "OFF"));
-            btnMusic.setOnAction(e -> musicControl(btnMusic));
-
-            Button btnBack = createSnakeButton("Back");
-            Button btnControls = createSnakeButton("Controls");
-            btnControls.setOnAction(e -> showControlsMenu());
-
-            btnBack.setOnAction(e -> showMainMenu());
-
-            menuBox.getChildren().addAll(
-                    optionsTitle,
-                    createSeparator(),
-                    btnSound,
-                    btnMusic,
-                    btnControls,
-                    createSeparator(),
-                    btnBack
-            );
-        }
-
-        private void createSnakeBackground() {
-            Rectangle bg = new Rectangle(getAppWidth(), getAppHeight(), Color.rgb(0, 20, 0));
-            getContentRoot().getChildren().add(0, bg);
-
-            for (int i = 0; i < 8; i++) {
-                Circle food = new Circle(5, Color.RED);
-                food.setTranslateX(Math.random() * getAppWidth());
-                food.setTranslateY(Math.random() * getAppHeight());
-                getContentRoot().getChildren().add(food);
-
-                Timeline timeline = new Timeline(
-                        new KeyFrame(Duration.seconds(2), e -> {
-                            food.setTranslateX(Math.random() * getAppWidth());
-                            food.setTranslateY(Math.random() * getAppHeight());
-                        })
-                );
-                timeline.setCycleCount(Timeline.INDEFINITE);
-                timeline.play();
-            }
-        }
-
         private Button createSnakeButton(String text) {
             Button button = new Button(text);
             button.setPrefWidth(300);
@@ -302,14 +289,77 @@ public class GUI extends GameApplication {
             separator.setOpacity(0.5);
             return separator;
         }
+
+        private void createSnakeBackground() {
+            Rectangle bg = new Rectangle(getAppWidth(), getAppHeight(), Color.rgb(0, 20, 0));
+            getContentRoot().getChildren().add(0, bg);
+
+            for (int i = 0; i < 8; i++) {
+                Circle food = new Circle(5, Color.RED);
+                food.setTranslateX(Math.random() * getAppWidth());
+                food.setTranslateY(Math.random() * getAppHeight());
+                getContentRoot().getChildren().add(food);
+
+                Timeline timeline = new Timeline(
+                        new KeyFrame(Duration.seconds(2), e -> {
+                            food.setTranslateX(Math.random() * getAppWidth());
+                            food.setTranslateY(Math.random() * getAppHeight());
+                        })
+                );
+                timeline.setCycleCount(Timeline.INDEFINITE);
+                timeline.play();
+            }
+        }
     }
 
     @Override
     protected void initGame() {
-        player = FXGL.entityBuilder()
-                .at(400, 300)
-                .view(new Rectangle(40, 40, Color.BLUE))
-                .buildAndAttach();
+        HBox gameContainer = new HBox(20);
+        gameContainer.setAlignment(Pos.CENTER_LEFT);
+
+        int cellSize = 20;
+        int gridWidth, gridHeight;
+        switch (selectedSize) {
+            case "Small":
+                gridWidth = 30;
+                gridHeight = 30;
+                break;
+            case "Large":
+                gridWidth = 50;
+                gridHeight = 40;
+                break;
+            default: // Medium
+                gridWidth = 40;
+                gridHeight = 35;
+                break;
+        }
+
+        VBox grid = new VBox(0);
+        grid.setAlignment(Pos.CENTER);
+
+        for (int i = 0; i < gridHeight; i++) {
+            HBox row = new HBox(0);
+            row.setAlignment(Pos.CENTER);
+            for (int j = 0; j < gridWidth; j++) {
+                Rectangle cell = new Rectangle(cellSize, cellSize);
+                if ((i + j) % 2 == 0) {
+                    cell.setFill(Color.rgb(50, 150, 50));
+                } else {
+                    cell.setFill(Color.rgb(100, 200, 100));
+                }
+                row.getChildren().add(cell);
+            }
+            grid.getChildren().add(row);
+        }
+
+        VBox sidebar = new VBox(20);
+        sidebar.setAlignment(Pos.TOP_CENTER);
+        sidebar.setPadding(new Insets(20));
+        sidebar.setStyle("-fx-background-color: white;");
+        sidebar.setPrefWidth(200);
+
+        scoreText = new Text("Score: 0");
+        scoreText.setStyle("-fx-font-size: 24px; -fx-fill: #006400;");
 
         endGameButton = new Button("End Game");
         endGameButton.setStyle(
@@ -322,10 +372,14 @@ public class GUI extends GameApplication {
         );
         endGameButton.setOnAction(e -> FXGL.getGameController().gotoMainMenu());
 
-        endGameButton.setTranslateX(FXGL.getAppWidth() - 100);
-        endGameButton.setTranslateY(10);
+        sidebar.getChildren().addAll(scoreText, endGameButton);
+        gameContainer.getChildren().addAll(grid, sidebar);
+        FXGL.getGameScene().addUINode(gameContainer);
 
-        FXGL.getGameScene().addUINode(endGameButton);
+        player = FXGL.entityBuilder()
+                .at(400, 300)
+                .view(new Rectangle(20, 20, Color.MEDIUMVIOLETRED))
+                .buildAndAttach();
     }
 
     @Override
