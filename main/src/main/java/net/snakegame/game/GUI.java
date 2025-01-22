@@ -42,8 +42,8 @@ public class GUI extends GameApplication {
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setWidth(1200);
-        settings.setHeight(800);
+        settings.setWidth(900);
+        settings.setHeight(700);
         settings.setTitle("Snake Game");
         settings.setMainMenuEnabled(true);
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
@@ -142,6 +142,7 @@ public class GUI extends GameApplication {
             menuBox.getChildren().clear();
 
             Text optionsTitle = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 32);
+            Text gameSizeTitel = FXGL.getUIFactoryService().newText("Size", Color.LIGHTGREEN, 26);
 
             Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
             btnSound.setOnAction(e -> soundControl(btnSound));
@@ -170,8 +171,10 @@ public class GUI extends GameApplication {
                     createSeparator(),
                     btnSound,
                     btnMusic,
-                    sizeSelector,
                     btnControls,
+                    createSeparator(),
+                    gameSizeTitel,
+                    sizeSelector,
                     createSeparator(),
                     btnBack
             );
@@ -321,16 +324,16 @@ public class GUI extends GameApplication {
         int gridWidth, gridHeight;
         switch (selectedSize) {
             case "Small":
-                gridWidth = 30;
-                gridHeight = 30;
+                gridWidth = 10;
+                gridHeight = 9;
                 break;
             case "Large":
-                gridWidth = 50;
-                gridHeight = 40;
+                gridWidth = 24;
+                gridHeight = 21;
                 break;
             default: // Medium
-                gridWidth = 40;
-                gridHeight = 35;
+                gridWidth = 17;
+                gridHeight = 15;
                 break;
         }
 
