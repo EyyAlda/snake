@@ -317,26 +317,53 @@ public class GUI extends GameApplication {
 
     @Override
     protected void initGame() {
-        HBox gameContainer = new HBox(20);
-        gameContainer.setAlignment(Pos.CENTER_LEFT);
-
-        int cellSize = 20;
+        int screenWidth = 900;
+        int screenHeight = 700;
+        int cellSize = 25; // Slightly smaller cell size for large grid
         int gridWidth, gridHeight;
         switch (selectedSize) {
             case "Small":
-                gridWidth = 10;
-                gridHeight = 9;
+                gridWidth = 15;
+                gridHeight = 12;
                 break;
             case "Large":
-                gridWidth = 24;
-                gridHeight = 21;
+                gridWidth = 25;
+                gridHeight = 20;
                 break;
             default: // Medium
-                gridWidth = 17;
-                gridHeight = 15;
+                gridWidth = 20;
+                gridHeight = 16;
                 break;
         }
 
+        int totalGridWidth = cellSize * gridWidth;
+        int totalGridHeight = cellSize * gridHeight;
+
+        // Create background similar to main menu
+        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 20, 0));
+        FXGL.getGameScene().addUINode(bg);
+
+        for (int i = 0; i < 8; i++) {
+            Circle food = new Circle(5, Color.RED);
+            food.setTranslateX(Math.random() * screenWidth);
+            food.setTranslateY(Math.random() * screenHeight);
+            FXGL.getGameScene().addUINode(food);
+
+            Timeline timeline = new Timeline(
+                    new KeyFrame(Duration.seconds(2), e -> {
+                        food.setTranslateX(Math.random() * screenWidth);
+                        food.setTranslateY(Math.random() * screenHeight);
+                    })
+            );
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.play();
+        }
+
+        HBox gameContainer = new HBox(20);
+        gameContainer.setAlignment(Pos.CENTER);
+        gameContainer.setPadding(new Insets(20));
+
+        // Rest of the existing initGame() method remains the same...
         VBox grid = new VBox(0);
         grid.setAlignment(Pos.CENTER);
 
@@ -377,11 +404,17 @@ public class GUI extends GameApplication {
 
         sidebar.getChildren().addAll(scoreText, endGameButton);
         gameContainer.getChildren().addAll(grid, sidebar);
+
+        gameContainer.setTranslateX((screenWidth - (totalGridWidth + 240)) / 2);
+        gameContainer.setTranslateY((screenHeight - totalGridHeight) / 2);
+
         FXGL.getGameScene().addUINode(gameContainer);
 
+        // Player positioned in the grid
         player = FXGL.entityBuilder()
-                .at(400, 300)
-                .view(new Rectangle(20, 20, Color.MEDIUMVIOLETRED))
+                .at(gameContainer.getTranslateX() + (totalGridWidth / 2),
+                        gameContainer.getTranslateY() + (totalGridHeight / 2))
+                .view(new Rectangle(cellSize, cellSize, Color.MEDIUMVIOLETRED))
                 .buildAndAttach();
     }
 
