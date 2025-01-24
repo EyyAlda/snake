@@ -154,7 +154,7 @@ public class GUI extends GameApplication {
             sizeSelector.getItems().addAll("Small", "Medium", "Large");
             sizeSelector.setValue(selectedSize);
             sizeSelector.setStyle(
-                    "-fx-background-color: #006400;" +
+                    "-fx-background-color: #004d00;" +
                             "-fx-text-fill: white;" +
                             "-fx-font-size: 14px;"
             );
@@ -238,16 +238,16 @@ public class GUI extends GameApplication {
         }
 
         private String createNormalControlStyle() {
-            return "-fx-background-color: #006400;" +
+            return "-fx-background-color: #004d00;" +
                     "-fx-text-fill: white;" +
                     "-fx-font-size: 14px;" +
                     "-fx-padding: 5px 10px;" +
-                    "-fx-border-color: #32CD32;" +
+                    "-fx-border-color: #2e8b57;" +
                     "-fx-border-width: 1px;";
         }
 
         private String createWaitingControlStyle() {
-            return "-fx-background-color: #008800;" +
+            return "-fx-background-color: #008000;" +
                     "-fx-text-fill: yellow;" +
                     "-fx-font-size: 14px;" +
                     "-fx-padding: 5px 10px;" +
@@ -259,25 +259,27 @@ public class GUI extends GameApplication {
             Button button = new Button(text);
             button.setPrefWidth(300);
 
-            String normalStyle = "-fx-background-color: #006400;" +
-                    "-fx-text-fill: #98FB98;" +
+            String normalStyle = "-fx-background-color: #004d00;" + // Darker green
+                    "-fx-text-fill: #90ee90;" + // Light green text
                     "-fx-font-size: 18px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-padding: 15px;" +
-                    "-fx-border-color: #32CD32;" +
+                    "-fx-border-color: #2e8b57;" + // Sea green border
                     "-fx-border-width: 2px;" +
-                    "-fx-border-radius: 5px;" +
-                    "-fx-background-radius: 5px;";
+                    "-fx-border-radius: 10px;" + // More rounded corners
+                    "-fx-background-radius: 10px;" +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0.0, 0, 1);"; // Shadow effect
 
-            String hoverStyle = "-fx-background-color: #008000;" +
-                    "-fx-text-fill: white;" +
+            String hoverStyle = "-fx-background-color: #008000;" + // Brighter green on hover
+                    "-fx-text-fill: #e0ffff;" + // Light cyan text
                     "-fx-font-size: 18px;" +
                     "-fx-font-weight: bold;" +
                     "-fx-padding: 15px;" +
-                    "-fx-border-color: #98FB98;" +
+                    "-fx-border-color: #3cb371;" + // Medium sea green border
                     "-fx-border-width: 2px;" +
-                    "-fx-border-radius: 5px;" +
-                    "-fx-background-radius: 5px;";
+                    "-fx-border-radius: 10px;" +
+                    "-fx-background-radius: 10px;" +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0.0, 0, 1);"; // Stronger shadow
 
             button.setStyle(normalStyle);
             button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
@@ -294,19 +296,27 @@ public class GUI extends GameApplication {
         }
 
         private void createSnakeBackground() {
-            Rectangle bg = new Rectangle(getAppWidth(), getAppHeight(), Color.rgb(0, 20, 0));
+            Rectangle bg = new Rectangle(getAppWidth(), getAppHeight(), Color.rgb(0, 30, 0));
             getContentRoot().getChildren().add(0, bg);
 
-            for (int i = 0; i < 8; i++) {
-                Circle food = new Circle(5, Color.RED);
-                food.setTranslateX(Math.random() * getAppWidth());
-                food.setTranslateY(Math.random() * getAppHeight());
-                getContentRoot().getChildren().add(food);
+            for (int i = 0; i < 12; i++) {
+                Circle snakeScale = new Circle(3 + Math.random() * 5,
+                        Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
+                snakeScale.setTranslateX(Math.random() * getAppWidth());
+                snakeScale.setTranslateY(Math.random() * getAppHeight());
+                getContentRoot().getChildren().add(snakeScale);
 
                 Timeline timeline = new Timeline(
-                        new KeyFrame(Duration.seconds(2), e -> {
-                            food.setTranslateX(Math.random() * getAppWidth());
-                            food.setTranslateY(Math.random() * getAppHeight());
+                        new KeyFrame(Duration.seconds(2 + Math.random() * 3), e -> {
+                            snakeScale.setTranslateX(Math.random() * getAppWidth());
+                            snakeScale.setTranslateY(Math.random() * getAppHeight());
+                            snakeScale.setRadius(3 + Math.random() * 5);
+                            snakeScale.setFill(Color.rgb(
+                                    50 + (int)(Math.random() * 50),
+                                    100 + (int)(Math.random() * 100),
+                                    50,
+                                    0.7
+                            ));
                         })
                 );
                 timeline.setCycleCount(Timeline.INDEFINITE);
@@ -319,7 +329,7 @@ public class GUI extends GameApplication {
     protected void initGame() {
         int screenWidth = 900;
         int screenHeight = 700;
-        int cellSize = 25; // Slightly smaller cell size for large grid
+        int cellSize = 25;
         int gridWidth, gridHeight;
         switch (selectedSize) {
             case "Small":
@@ -339,31 +349,15 @@ public class GUI extends GameApplication {
         int totalGridWidth = cellSize * gridWidth;
         int totalGridHeight = cellSize * gridHeight;
 
-        // Create background similar to main menu
-        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 20, 0));
+        // Snake-themed background
+        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 40, 0));
         FXGL.getGameScene().addUINode(bg);
-
-        for (int i = 0; i < 8; i++) {
-            Circle food = new Circle(5, Color.RED);
-            food.setTranslateX(Math.random() * screenWidth);
-            food.setTranslateY(Math.random() * screenHeight);
-            FXGL.getGameScene().addUINode(food);
-
-            Timeline timeline = new Timeline(
-                    new KeyFrame(Duration.seconds(2), e -> {
-                        food.setTranslateX(Math.random() * screenWidth);
-                        food.setTranslateY(Math.random() * screenHeight);
-                    })
-            );
-            timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.play();
-        }
 
         HBox gameContainer = new HBox(20);
         gameContainer.setAlignment(Pos.CENTER);
         gameContainer.setPadding(new Insets(20));
 
-        // Rest of the existing initGame() method remains the same...
+        // Create snake-scale grid
         VBox grid = new VBox(0);
         grid.setAlignment(Pos.CENTER);
 
@@ -373,32 +367,46 @@ public class GUI extends GameApplication {
             for (int j = 0; j < gridWidth; j++) {
                 Rectangle cell = new Rectangle(cellSize, cellSize);
                 if ((i + j) % 2 == 0) {
-                    cell.setFill(Color.rgb(50, 150, 50));
+                    cell.setFill(Color.rgb(144, 238, 144)); // Medium sea green
                 } else {
-                    cell.setFill(Color.rgb(100, 200, 100));
+                    cell.setFill(Color.rgb(50, 205, 50)); // Sea green
                 }
+                cell.setStroke(Color.rgb(34, 139, 34, 0.3)); // Forest green light border
                 row.getChildren().add(cell);
             }
             grid.getChildren().add(row);
         }
 
+        // Sidebar with snake theme
         VBox sidebar = new VBox(20);
         sidebar.setAlignment(Pos.TOP_CENTER);
         sidebar.setPadding(new Insets(20));
-        sidebar.setStyle("-fx-background-color: white;");
+        sidebar.setStyle(
+                "-fx-background-color: rgba(0, 100, 0, 0.8);" + // Dark green with transparency
+                        "-fx-border-color: #3cb371;" + // Medium sea green border
+                        "-fx-border-width: 2px;"
+        );
         sidebar.setPrefWidth(200);
 
+        // Score text with snake theme
         scoreText = new Text("Score: 0");
-        scoreText.setStyle("-fx-font-size: 24px; -fx-fill: #006400;");
+        scoreText.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-fill: #90ee90;" + // Light green
+                        "-fx-font-weight: bold;"
+        );
 
+        // End game button with snake theme
         endGameButton = new Button("End Game");
         endGameButton.setStyle(
-                "-fx-background-color: #006400;" +
-                        "-fx-text-fill: #98FB98;" +
+                "-fx-background-color: #004d00;" + // Dark green
+                        "-fx-text-fill: #90ee90;" + // Light green
                         "-fx-font-size: 14px;" +
                         "-fx-padding: 8px 16px;" +
-                        "-fx-border-color: #32CD32;" +
-                        "-fx-border-width: 1px;"
+                        "-fx-border-color: #2e8b57;" + // Sea green
+                        "-fx-border-width: 1px;" +
+                        "-fx-border-radius: 5px;" +
+                        "-fx-background-radius: 5px;"
         );
         endGameButton.setOnAction(e -> FXGL.getGameController().gotoMainMenu());
 
@@ -410,11 +418,11 @@ public class GUI extends GameApplication {
 
         FXGL.getGameScene().addUINode(gameContainer);
 
-        // Player positioned in the grid
+        // Player as a snake segment
         player = FXGL.entityBuilder()
                 .at(gameContainer.getTranslateX() + (totalGridWidth / 2),
                         gameContainer.getTranslateY() + (totalGridHeight / 2))
-                .view(new Rectangle(cellSize, cellSize, Color.MEDIUMVIOLETRED))
+                .view(new Rectangle(cellSize, cellSize, Color.rgb(34, 139, 34, 0.9))) // Forest green
                 .buildAndAttach();
     }
 
