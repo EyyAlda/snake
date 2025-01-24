@@ -371,7 +371,7 @@ public class GUI extends GameApplication {
                 } else {
                     cell.setFill(Color.rgb(50, 205, 50)); // Sea green
                 }
-                cell.setStroke(Color.rgb(34, 139, 34, 0.3)); // Forest green light border
+                cell.setStroke(Color.rgb(34, 139, 34, 0.4)); // Forest green light border
                 row.getChildren().add(cell);
             }
             grid.getChildren().add(row);
