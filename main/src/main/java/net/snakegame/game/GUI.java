@@ -349,9 +349,34 @@ public class GUI extends GameApplication {
         int totalGridWidth = cellSize * gridWidth;
         int totalGridHeight = cellSize * gridHeight;
 
-        // Snake-themed background
-        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 40, 0));
+        // Snake-themed animated background
+        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 30, 0));
         FXGL.getGameScene().addUINode(bg);
+
+        // Add animated circles similar to the main menu
+        for (int i = 0; i < 12; i++) {
+            Circle snakeScale = new Circle(3 + Math.random() * 5,
+                    Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
+            snakeScale.setTranslateX(Math.random() * screenWidth);
+            snakeScale.setTranslateY(Math.random() * screenHeight);
+            FXGL.getGameScene().addUINode(snakeScale);
+
+            Timeline timeline = new Timeline(
+                    new KeyFrame(Duration.seconds(2 + Math.random() * 3), e -> {
+                        snakeScale.setTranslateX(Math.random() * screenWidth);
+                        snakeScale.setTranslateY(Math.random() * screenHeight);
+                        snakeScale.setRadius(3 + Math.random() * 5);
+                        snakeScale.setFill(Color.rgb(
+                                50 + (int)(Math.random() * 50),
+                                100 + (int)(Math.random() * 100),
+                                50,
+                                0.7
+                        ));
+                    })
+            );
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.play();
+        }
 
         HBox gameContainer = new HBox(20);
         gameContainer.setAlignment(Pos.CENTER);
@@ -425,7 +450,6 @@ public class GUI extends GameApplication {
                 .view(new Rectangle(cellSize, cellSize, Color.rgb(34, 139, 34, 0.9))) // Forest green
                 .buildAndAttach();
     }
-
     @Override
     protected void initInput() {
         FXGL.onKey(upKey, () -> player.translateY(-5));
