@@ -25,11 +25,14 @@ import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
+import java.io.File;
 import java.util.EnumSet;
+import javafx.scene.media.*;
 
 public class GUI extends GameApplication {
     private Entity player;
     private Button endGameButton;
+    private Button skipTrackButton;
     private Text scoreText;
     private int score = 0;
     private KeyCode upKey = KeyCode.W;
@@ -39,6 +42,16 @@ public class GUI extends GameApplication {
     private static boolean isMusicOn = true;
     private static boolean isSoundOn = true;
     private static String selectedSize = "Medium";
+    private static MediaPlayer backgroundMusicPlayer;
+    private static int currentTrackIndex = 0;
+    private static final String[] MUSIC_TRACKS = {
+            "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/8bitGameMusic.wav",
+            "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/GameMusic1.wav",
+            "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/GameMusic2.wav"
+    };
+    private static MediaPlayer menuMusicPlayer;
+    private static final String MENU_MUSIC_TRACK = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/MenuMusic.wav";
+
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -57,10 +70,145 @@ public class GUI extends GameApplication {
         }
     }
 
+    private void initMenuMusic() {
+        try {
+            if (menuMusicPlayer != null) {
+                menuMusicPlayer.stop();
+                menuMusicPlayer.dispose();
+            }
+            Media menuMusic = new Media(new File(MENU_MUSIC_TRACK).toURI().toString());
+            menuMusicPlayer = new MediaPlayer(menuMusic);
+            menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Endlosschleife
+
+            if (isMusicOn) {
+                menuMusicPlayer.play();
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading menu music: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Methode zum Stoppen der Menümusik:
+    private void stopMenuMusic() {
+        if (menuMusicPlayer != null) {
+            menuMusicPlayer.stop();
+            menuMusicPlayer.dispose();
+            menuMusicPlayer = null;
+        }
+    }
+
+
+    private void initBackgroundMusic() {
+
+        try {
+            loadAndPlayTrack(currentTrackIndex);
+
+            // Set up the end of media handler
+            backgroundMusicPlayer.setOnEndOfMedia(() -> {
+                currentTrackIndex = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
+                loadAndPlayTrack(currentTrackIndex);
+            });
+
+            // Get the primary stage and add focus listener
+            FXGL.getGameScene().getRoot().sceneProperty().addListener((observable, oldScene, newScene) -> {
+                if (newScene != null) {
+                    // Add direct focus listener to the scene's window
+                    newScene.getWindow().focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                        if (backgroundMusicPlayer != null) {
+                            if (isNowFocused && isMusicOn) {
+                                backgroundMusicPlayer.play();
+                            } else {
+                                backgroundMusicPlayer.pause();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Initial play if music is enabled
+            if (isMusicOn) {
+                backgroundMusicPlayer.play();
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading background music: " + e.getMessage());
+            e.printStackTrace(); // Added for better error tracking
+        }
+    }
+
+    private void loadAndPlayTrack(int trackIndex) {
+        try {
+            // Stoppe den aktuellen Player, falls vorhanden
+            if (backgroundMusicPlayer != null) {
+                backgroundMusicPlayer.stop();
+                backgroundMusicPlayer.dispose();
+            }
+
+            // Lade und starte den neuen Track
+            Media backgroundMusic = new Media(new File(MUSIC_TRACKS[trackIndex]).toURI().toString());
+            backgroundMusicPlayer = new MediaPlayer(backgroundMusic);
+            backgroundMusicPlayer.setCycleCount(1); // Spiele jeden Track einmal
+
+            // Setze den OnEndOfMedia Handler für den neuen Player
+            backgroundMusicPlayer.setOnEndOfMedia(() -> {
+                currentTrackIndex = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
+                loadAndPlayTrack(currentTrackIndex);
+            });
+
+            if (isMusicOn) {
+                backgroundMusicPlayer.play();
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading track " + trackIndex + ": " + e.getMessage());
+        }
+    }
+    public void skipToNextTrack() {
+        if (backgroundMusicPlayer != null) {
+            currentTrackIndex = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
+            loadAndPlayTrack(currentTrackIndex);
+        }
+    }
+
+    private void stopAndDisposeMusic() {
+        if (backgroundMusicPlayer != null) {
+            backgroundMusicPlayer.stop();
+            backgroundMusicPlayer.dispose();
+            backgroundMusicPlayer = null;
+        }
+    }
+
     private static class SnakeMainMenu extends FXGLMenu {
         private VBox menuBox;
         private Node waitingForKey = null;
         private Text waitingText = null;
+
+        public static void play_sound(int soundId){
+            if(isSoundOn){
+                switch (soundId){
+                    case 0:
+                        String soundEating = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/eating.wav";
+                        Media sound0 = new Media(new File (soundEating).toURI().toString());
+                        MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
+                        mediaPlayer0.play();
+                        break;
+
+                    case 1:
+                        String soundButton = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/KlickSound.wav";
+                        Media sound1 = new Media(new File(soundButton).toURI().toString());
+                        MediaPlayer mediaPlayer1 = new MediaPlayer(sound1);
+                        mediaPlayer1.play();
+                        mediaPlayer1.setVolume(1.0);
+                        break;
+
+                    case 2:
+                        String soundGameOver = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/SoundGameOver.wav";
+                        Media sound2 = new Media(new File(soundGameOver).toURI().toString());
+                        MediaPlayer mediaPlayer2 = new MediaPlayer(sound2);
+                        mediaPlayer2.play();
+                        break;
+                }
+            }
+        }
 
         public SnakeMainMenu() {
             super(MenuType.MAIN_MENU);
@@ -100,17 +248,32 @@ public class GUI extends GameApplication {
         private void showMainMenu() {
             menuBox.getChildren().clear();
 
+            // Starte Menümusik wenn das Hauptmenü angezeigt wird
+            GUI mainInstance = (GUI) FXGL.getApp();
+            mainInstance.initMenuMusic();
+
             Text title = FXGL.getUIFactoryService().newText("SNAKE", Color.LIGHTGREEN, 72);
             title.setEffect(new DropShadow(10, Color.BLACK));
 
             Button btnPlay = createSnakeButton("Start Game");
-            btnPlay.setOnAction(e -> fireNewGame());
+            btnPlay.setOnAction(e -> {
+                play_sound(1);
+                GUI mainInstance2 = (GUI) FXGL.getApp();
+                mainInstance2.stopMenuMusic(); // Stoppe Menümusik vor Spielstart
+                fireNewGame();
+            });
 
             Button btnOptions = createSnakeButton("Options");
-            btnOptions.setOnAction(e -> showOptionsMenu());
+            btnOptions.setOnAction(e -> {
+                play_sound(1);
+                showOptionsMenu();
+            });
 
             Button btnEndGame = createSnakeButton("End Game");
-            btnEndGame.setOnAction(e -> FXGL.getGameController().exit());
+            btnEndGame.setOnAction(e -> {
+                play_sound(1);
+                FXGL.getGameController().exit();
+            });
 
             menuBox.getChildren().addAll(
                     title,
@@ -131,7 +294,25 @@ public class GUI extends GameApplication {
         private void musicControl(Button btnMusic) {
             isMusicOn = !isMusicOn;
             btnMusic.setText("Music: " + (isMusicOn ? "ON" : "OFF"));
+
+            GUI mainInstance = (GUI) FXGL.getApp();
+            if (isMusicOn) {
+                if (menuMusicPlayer != null) {
+                    menuMusicPlayer.play();
+                }
+                if (backgroundMusicPlayer != null) {
+                    backgroundMusicPlayer.play();
+                }
+            } else {
+                if (menuMusicPlayer != null) {
+                    menuMusicPlayer.pause();
+                }
+                if (backgroundMusicPlayer != null) {
+                    backgroundMusicPlayer.pause();
+                }
+            }
         }
+
 
         private void soundControl(Button btnSound) {
             isSoundOn = !isSoundOn;
@@ -145,26 +326,41 @@ public class GUI extends GameApplication {
             Text gameSizeTitel = FXGL.getUIFactoryService().newText("Size", Color.LIGHTGREEN, 26);
 
             Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
-            btnSound.setOnAction(e -> soundControl(btnSound));
+            btnSound.setOnAction(e -> {
+                play_sound(1);
+                soundControl(btnSound);
+            });
 
             Button btnMusic = createSnakeButton("Music: " + (isMusicOn ? "ON" : "OFF"));
-            btnMusic.setOnAction(e -> musicControl(btnMusic));
+            btnMusic.setOnAction(e -> {
+                play_sound(1);
+                musicControl(btnMusic);
+            });
 
             ComboBox<String> sizeSelector = new ComboBox<>();
             sizeSelector.getItems().addAll("Small", "Medium", "Large");
             sizeSelector.setValue(selectedSize);
             sizeSelector.setStyle(
                     "-fx-background-color: #004d00;" +
-                            "-fx-text-fill: white;" +
+                            "-fx-color: white;" +
                             "-fx-font-size: 14px;"
             );
-            sizeSelector.setOnAction(e -> selectedSize = sizeSelector.getValue());
+            sizeSelector.setOnAction(e -> {
+                play_sound(1);
+                selectedSize = sizeSelector.getValue();
+            });
 
             Button btnControls = createSnakeButton("Controls");
-            btnControls.setOnAction(e -> showControlsMenu());
+            btnControls.setOnAction(e -> {
+                play_sound(1);
+                showControlsMenu();
+            });
 
             Button btnBack = createSnakeButton("Back");
-            btnBack.setOnAction(e -> showMainMenu());
+            btnBack.setOnAction(e -> {
+                play_sound(1);
+                showMainMenu();
+            });
 
             menuBox.getChildren().addAll(
                     optionsTitle,
@@ -181,6 +377,7 @@ public class GUI extends GameApplication {
         }
 
         private void showControlsMenu() {
+
             menuBox.getChildren().clear();
 
             Text controlsTitle = FXGL.getUIFactoryService().newText("Controls", Color.LIGHTGREEN, 32);
@@ -196,7 +393,10 @@ public class GUI extends GameApplication {
             HBox rightControl = createControlButton("Right", mainInstance.rightKey, "right");
 
             Button btnBack = createSnakeButton("Back");
-            btnBack.setOnAction(e -> showOptionsMenu());
+            btnBack.setOnAction(e -> {
+                play_sound(1);
+                showOptionsMenu();
+            });
 
             controlsBox.getChildren().addAll(
                     upControl,
@@ -327,24 +527,25 @@ public class GUI extends GameApplication {
 
     @Override
     protected void initGame() {
+        initBackgroundMusic();
         int screenWidth = 900;
         int screenHeight = 700;
         int cellSize = 25;
         int gridWidth, gridHeight;
-        switch (selectedSize) {
-            case "Small":
+        gridHeight = switch (selectedSize) {
+            case "Small" -> {
                 gridWidth = 15;
-                gridHeight = 12;
-                break;
-            case "Large":
+                yield 12;
+            }
+            case "Large" -> {
                 gridWidth = 25;
-                gridHeight = 20;
-                break;
-            default: // Medium
+                yield 20;
+            }
+            default -> {
                 gridWidth = 20;
-                gridHeight = 16;
-                break;
-        }
+                yield 16;
+            }
+        };
 
         int totalGridWidth = cellSize * gridWidth;
         int totalGridHeight = cellSize * gridHeight;
@@ -424,6 +625,23 @@ public class GUI extends GameApplication {
         // End game button with snake theme
         endGameButton = new Button("End Game");
         endGameButton.setStyle(
+                "-fx-background-color: #004d00;" +
+                        "-fx-text-fill: #90ee90;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-padding: 8px 16px;" +
+                        "-fx-border-color: #2e8b57;" +
+                        "-fx-border-width: 1px;" +
+                        "-fx-border-radius: 5px;" +
+                        "-fx-background-radius: 5px;"
+        );
+        endGameButton.setOnAction(e -> {
+            stopAndDisposeMusic();
+            initMenuMusic();
+            FXGL.getGameController().gotoMainMenu();
+        });
+
+        skipTrackButton = new Button("Skip Track");
+        skipTrackButton.setStyle(
                 "-fx-background-color: #004d00;" + // Dark green
                         "-fx-text-fill: #90ee90;" + // Light green
                         "-fx-font-size: 14px;" +
@@ -433,9 +651,9 @@ public class GUI extends GameApplication {
                         "-fx-border-radius: 5px;" +
                         "-fx-background-radius: 5px;"
         );
-        endGameButton.setOnAction(e -> FXGL.getGameController().gotoMainMenu());
+        skipTrackButton.setOnAction(e -> skipToNextTrack());
 
-        sidebar.getChildren().addAll(scoreText, endGameButton);
+        sidebar.getChildren().addAll(scoreText, endGameButton, skipTrackButton);
         gameContainer.getChildren().addAll(grid, sidebar);
 
         gameContainer.setTranslateX((screenWidth - (totalGridWidth + 240)) / 2);
