@@ -61,6 +61,7 @@ public class GUI extends GameApplication {
         settings.setMainMenuEnabled(true);
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
         settings.setSceneFactory(new CustomSceneFactory());
+        settings.setManualResizeEnabled(true);
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -546,6 +547,8 @@ public class GUI extends GameApplication {
                 yield 16;
             }
         };
+
+
 
         int totalGridWidth = cellSize * gridWidth;
         int totalGridHeight = cellSize * gridHeight;
