@@ -1,12 +1,19 @@
 package net.snakegame.game;
 
 public class PlayingArea {
+
+    /**
+     * Größenpreset identfier für die 3 standard Spielfeldgrößen
+     */
     public static enum Size {
         LARGE,
         MEDIUM,
         SMALL
     }
 
+    /**
+     * Spielfelddaten
+     */
     private int grid[][];
 
     public PlayingArea(Size area_size) {
@@ -27,9 +34,36 @@ public class PlayingArea {
                 break;
         }
         grid = new int[v_size][h_size];
+        for (int y = 0; y < grid.length; y++){
+            for (int x = 0; x < grid[y].length; x++){
+                grid[y][x] = 0;
+            }
+        }
     }
 
+    /** Gibt true zurück, wenn ein Platz im Grid vergeben ist
+     * @author Lennard Rütten
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean is_spot_taken(int x, int y){
+        if (grid[y][x] != 0) {
+        return true;
+        }
+        return false;
+    }
+
+    /** Plaziert eine Frucht zufällig auf dem Spielfeld
+     * @author Lennard Rütten
+     */
     public void place_fruit(){
+        int x;
+        int y;
+        do {
+            x = (int) Math.random() * grid[0].length;
+            y = (int) Math.random() * grid.length;
+        } while (is_spot_taken(x, y));
 
     }
 }
