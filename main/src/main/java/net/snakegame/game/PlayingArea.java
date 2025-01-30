@@ -16,7 +16,10 @@ public class PlayingArea {
      */
     private int grid[][];
 
-    public PlayingArea(Size area_size) {
+    Controller controller;
+
+    public PlayingArea(Size area_size, Controller controller) {
+        this.controller = controller;
         int h_size;
         int v_size;
         switch (area_size) {
@@ -64,6 +67,24 @@ public class PlayingArea {
             x = (int) Math.random() * grid[0].length;
             y = (int) Math.random() * grid.length;
         } while (is_spot_taken(x, y));
+        grid[y][x] = 4;
 
+    }
+
+    public void refresh_playing_area(){
+        for (int y = 0; y < grid.length; y++){
+            for (int x = 0; x < grid[y].length; x++){
+                if (grid[y][x] != 4){
+                    grid[y][x] = 0;
+                    if (controller.check_for_snake_position(x, y)){
+                        grid[y][x] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    public int[] get_playing_area_size(){
+        return new int[] {grid[0].length, grid.length};
     }
 }

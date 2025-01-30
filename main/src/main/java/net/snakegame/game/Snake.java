@@ -87,6 +87,17 @@ public class Snake {
         }
     }
 
+    public boolean is_snake_at_position(int x, int y){
+        SnakeElement temp = head;
+        while (temp != null) {
+            if (temp.x_coord == x && temp.y_coord == y) {
+                return true;
+            }
+            temp = temp.next;
+        }
+        return false;
+    }
+
     private class SnakeElement {
         int element_number;
         int x_coord;
