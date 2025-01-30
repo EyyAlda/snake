@@ -45,6 +45,36 @@ public class Snake {
         return direction;
     }
 
+    public int[] get_snake_head_coords() {
+        return new int[] {head.x_coord, head.y_coord};
+    }
+
+    private boolean check_coords(int x, int y) {
+            
+    }
+
+
+    private boolean can_snake_move() {
+        int temp_x = head.x_coord;
+        int temp_y = head.y_coord;
+        switch (direction) {
+            case 0:
+                temp_x++;
+                return check_coords(temp_x, head.y_coord);
+            case 1:
+                temp_y++;
+                return check_coords(head.x_coord, temp_y);
+            case 2:
+                temp_x--;
+                return check_coords(temp_x, head.y_coord);
+            case 3:
+                temp_y--;
+                return check_coords(head.x_coord, temp_y);
+        }
+        return false;
+
+    }
+
     /**Bewege die Schlange einen Schritt weiter in die Entsprechende Richtung
      * 
      */
