@@ -197,14 +197,14 @@ public class GUI extends GameApplication {
             if(isSoundOn){
                 switch (soundId){
                     case 0:
-                        String soundEating = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/eating.wav";
+                        String soundEating = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/eating.wav";
                         Media sound0 = new Media(new File (soundEating).toURI().toString());
                         MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
                         mediaPlayer0.play();
                         break;
 
                     case 1:
-                        String soundButton = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/KlickSound.wav";
+                        String soundButton = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/KlickSound.wav";
                         Media sound1 = new Media(new File(soundButton).toURI().toString());
                         MediaPlayer mediaPlayer1 = new MediaPlayer(sound1);
                         mediaPlayer1.play();
@@ -212,7 +212,7 @@ public class GUI extends GameApplication {
                         break;
 
                     case 2:
-                        String soundGameOver = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/SoundGameOver.wav";
+                        String soundGameOver = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/SoundGameOver.wav";
                         Media sound2 = new Media(new File(soundGameOver).toURI().toString());
                         MediaPlayer mediaPlayer2 = new MediaPlayer(sound2);
                         mediaPlayer2.play();
