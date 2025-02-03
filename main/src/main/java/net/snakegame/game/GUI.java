@@ -46,12 +46,12 @@ public class GUI extends GameApplication {
     private static MediaPlayer backgroundMusicPlayer;
     private static int currentTrackIndex = 0;
     private static final String[] MUSIC_TRACKS = {
-            "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/8bitGameMusic.wav",
-            "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/GameMusic1.wav",
-            "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/GameMusic2.wav"
+            Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/8bitGameMusic.wav",
+            Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic1.wav",
+            Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic2.wav"
     };
     private static MediaPlayer menuMusicPlayer;
-    private static final String MENU_MUSIC_TRACK = "/home/nickgegenheimer/Dokumente/dev/Snake/Sounds/MenuMusic.wav";
+    private static final String MENU_MUSIC_TRACK = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/MenuMusic.wav";
 
 
     @Override
@@ -62,6 +62,7 @@ public class GUI extends GameApplication {
         settings.setMainMenuEnabled(true);
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
         settings.setSceneFactory(new CustomSceneFactory());
+        settings.setManualResizeEnabled(true);
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -564,6 +565,8 @@ public class GUI extends GameApplication {
                 yield 16;
             }
         };
+
+
 
         int totalGridWidth = cellSize * gridWidth;
         int totalGridHeight = cellSize * gridHeight;
