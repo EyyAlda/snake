@@ -42,6 +42,7 @@ public class GUI extends GameApplication {
     private static boolean isMusicOn = true;
     private static boolean isSoundOn = true;
     private static String selectedSize = "Medium";
+    private static String slectedSpeed = "Medium";
     private static MediaPlayer backgroundMusicPlayer;
     private static int currentTrackIndex = 0;
     private static final String[] MUSIC_TRACKS = {
@@ -182,6 +183,15 @@ public class GUI extends GameApplication {
         private Node waitingForKey = null;
         private Text waitingText = null;
 
+        public SnakeMainMenu() {
+            super(MenuType.MAIN_MENU);
+            createSnakeBackground();
+            menuBox = new VBox(15);
+            menuBox.setAlignment(Pos.CENTER);
+            showMainMenu();
+            getContentRoot().setOnKeyPressed(this::handleKeyPress);
+        }
+
         public static void play_sound(int soundId){
             if(isSoundOn){
                 switch (soundId){
@@ -208,15 +218,6 @@ public class GUI extends GameApplication {
                         break;
                 }
             }
-        }
-
-        public SnakeMainMenu() {
-            super(MenuType.MAIN_MENU);
-            createSnakeBackground();
-            menuBox = new VBox(15);
-            menuBox.setAlignment(Pos.CENTER);
-            showMainMenu();
-            getContentRoot().setOnKeyPressed(this::handleKeyPress);
         }
 
         private void handleKeyPress(KeyEvent event) {
@@ -324,6 +325,8 @@ public class GUI extends GameApplication {
 
             Text optionsTitle = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 32);
             Text gameSizeTitel = FXGL.getUIFactoryService().newText("Size", Color.LIGHTGREEN, 26);
+            Text speedGameTitel = FXGL.getUIFactoryService().newText("Speed", Color.LIGHTGREEN, 26);
+
 
             Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
             btnSound.setOnAction(e -> {
@@ -350,6 +353,19 @@ public class GUI extends GameApplication {
                 selectedSize = sizeSelector.getValue();
             });
 
+            ComboBox<String> speedSelector = new ComboBox<>();
+            speedSelector.getItems().addAll("Fast", "Medium", "Slow");
+            speedSelector.setValue(slectedSpeed);
+            speedSelector.setStyle(
+                    "-fx-background-color: #004d00;" +
+                            "-fx-color: white;" +
+                            "-fx-font-size: 14px;"
+            );
+            speedSelector.setOnAction(e -> {
+                play_sound(1);
+                slectedSpeed = speedSelector.getValue();
+            });
+
             Button btnControls = createSnakeButton("Controls");
             btnControls.setOnAction(e -> {
                 play_sound(1);
@@ -371,6 +387,8 @@ public class GUI extends GameApplication {
                     createSeparator(),
                     gameSizeTitel,
                     sizeSelector,
+                    speedGameTitel,
+                    speedSelector,
                     createSeparator(),
                     btnBack
             );
