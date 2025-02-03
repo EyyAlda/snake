@@ -68,6 +68,7 @@ public class GUI extends GameApplication {
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
         settings.setSceneFactory(new CustomSceneFactory());
         settings.setManualResizeEnabled(true);
+        settings.setPreserveResizeRatio(true);
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -422,8 +423,11 @@ public class GUI extends GameApplication {
         }
 
         private void showControlsMenu() {
+            // Remove the options box first
+            getContentRoot().getChildren().remove(optionsBox);
 
-            menuBox.getChildren().clear();
+            // Clear and reuse the options box for controls
+            optionsBox.getChildren().clear();
 
             Text controlsTitle = FXGL.getUIFactoryService().newText("Controls", Color.LIGHTGREEN, 32);
 
@@ -450,14 +454,24 @@ public class GUI extends GameApplication {
                     rightControl
             );
 
-            menuBox.getChildren().addAll(
+            optionsBox.getChildren().addAll(
                     controlsTitle,
                     createSeparator(),
                     controlsBox,
                     createSeparator(),
                     btnBack
             );
+
+            // Position the controls box
+            optionsBox.setTranslateX(getAppWidth() / 2.0 - 150);
+            optionsBox.setTranslateY(getAppHeight() / 2.0 - 300);
+
+            // Add the controls box to the scene
+            if (!getContentRoot().getChildren().contains(optionsBox)) {
+                getContentRoot().getChildren().add(optionsBox);
+            }
         }
+
 
         private HBox createControlButton(String label, KeyCode currentKey, String controlType) {
             HBox control = new HBox(10);
