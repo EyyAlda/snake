@@ -25,9 +25,7 @@ public class Snake {
         starting_pos_y = starting_y;
     }
 
-    /**Funktion zum Verlängern oder Kürzen der Schlange
-     * @param amount
-     */
+    /**Funktion zum Verlängern oder Kürzen der Schlange*/
     public void add_element() {
         bodyLength += 1;
         SnakeElement temp = head;
