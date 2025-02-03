@@ -186,17 +186,25 @@ public class GUI extends GameApplication {
 
     private static class SnakeMainMenu extends FXGLMenu {
         private VBox menuBox;
+        private VBox optionsBox;
         private Node waitingForKey = null;
         private Text waitingText = null;
 
         public SnakeMainMenu() {
             super(MenuType.MAIN_MENU);
             createSnakeBackground();
+
+            // Separate boxes for main menu and options
             menuBox = new VBox(15);
             menuBox.setAlignment(Pos.CENTER);
+
+            optionsBox = new VBox(15);
+            optionsBox.setAlignment(Pos.CENTER);
+
             showMainMenu();
             getContentRoot().setOnKeyPressed(this::handleKeyPress);
         }
+
 
         public static void play_sound(int soundId){
             if(isSoundOn){
@@ -254,6 +262,9 @@ public class GUI extends GameApplication {
 
         private void showMainMenu() {
             menuBox.getChildren().clear();
+
+            // Entferne optionsBox falls vorhanden
+            getContentRoot().getChildren().remove(optionsBox);
 
             // Starte Menümusik wenn das Hauptmenü angezeigt wird
             GUI mainInstance = (GUI) FXGL.getApp();
@@ -327,12 +338,14 @@ public class GUI extends GameApplication {
         }
 
         private void showOptionsMenu() {
-            menuBox.getChildren().clear();
+            // Entferne das Hauptmenü
+            getContentRoot().getChildren().remove(menuBox);
+
+            optionsBox.getChildren().clear();
 
             Text optionsTitle = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 32);
             Text gameSizeTitel = FXGL.getUIFactoryService().newText("Size", Color.LIGHTGREEN, 26);
             Text speedGameTitel = FXGL.getUIFactoryService().newText("Speed", Color.LIGHTGREEN, 26);
-
 
             Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
             btnSound.setOnAction(e -> {
@@ -384,7 +397,7 @@ public class GUI extends GameApplication {
                 showMainMenu();
             });
 
-            menuBox.getChildren().addAll(
+            optionsBox.getChildren().addAll(
                     optionsTitle,
                     createSeparator(),
                     btnSound,
@@ -398,6 +411,14 @@ public class GUI extends GameApplication {
                     createSeparator(),
                     btnBack
             );
+
+            // Position the options box higher up than the main menu
+            optionsBox.setTranslateX(getAppWidth() / 2.0 - 150);
+            optionsBox.setTranslateY(getAppHeight() / 2.0 - 300); // Höher positioniert als das Hauptmenü
+
+            if (!getContentRoot().getChildren().contains(optionsBox)) {
+                getContentRoot().getChildren().add(optionsBox);
+            }
         }
 
         private void showControlsMenu() {
