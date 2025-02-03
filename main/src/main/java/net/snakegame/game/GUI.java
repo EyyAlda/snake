@@ -23,6 +23,7 @@ import javafx.util.Duration;
 import javafx.scene.shape.Circle;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import java.io.File;
@@ -52,6 +53,10 @@ public class GUI extends GameApplication {
     };
     private static MediaPlayer menuMusicPlayer;
     private static final String MENU_MUSIC_TRACK = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/MenuMusic.wav";
+    private static int GRID_SIZE_X;
+    private static int GRID_SIZE_Y;
+    private static int CELL_SIZE;
+    private Game game;
 
 
     @Override
@@ -565,7 +570,9 @@ public class GUI extends GameApplication {
                 yield 16;
             }
         };
-
+        GRID_SIZE_X = gridWidth;
+        GRID_SIZE_Y = gridHeight;
+        CELL_SIZE = cellSize;
 
 
         int totalGridWidth = cellSize * gridWidth;
@@ -691,12 +698,24 @@ public class GUI extends GameApplication {
     }
     @Override
     protected void initInput() {
-        FXGL.onKey(upKey, () -> player.translateY(-5));
-        FXGL.onKey(downKey, () -> player.translateY(5));
-        FXGL.onKey(leftKey, () -> player.translateX(-5));
-        FXGL.onKey(rightKey, () -> player.translateX(5));
-
+        FXGL.onKey(upKey, () -> {
+            player.translateY(-5); 
+            game.set_direction(new Point2D(0, -1));
+        });
+        FXGL.onKey(downKey, () -> {
+            player.translateY(5);
+            game.set_direction(new Point2D(0, 1));
+        });
+        FXGL.onKey(leftKey, () -> {
+            player.translateX(-5);
+            game.set_direction(new Point2D(-1, 0));
+        });
+        FXGL.onKey(rightKey, () -> {
+            player.translateX(5);
+            game.set_direction(new Point2D(1, 0));
+        });
         FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
+            game.set_direction(new Point2D(0, 0));
             FXGL.getGameController().gotoMainMenu();
         });
     }
@@ -704,5 +723,13 @@ public class GUI extends GameApplication {
     public void start_gui(String[] args) {
 
         launch(args);
+    }
+
+    public int[] get_grid_size(){
+        return new int[] {GRID_SIZE_X, GRID_SIZE_Y};
+    }
+
+    public int get_cell_size(){
+        return CELL_SIZE;
     }
 }

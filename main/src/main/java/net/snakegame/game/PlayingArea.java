@@ -18,10 +18,11 @@ public class PlayingArea {
 
     Controller controller;
 
+    int h_size;
+    int v_size;
+
     public PlayingArea(Size area_size, Controller controller) {
         this.controller = controller;
-        int h_size;
-        int v_size;
         switch (area_size) {
             case LARGE:
                 h_size = 25;
@@ -69,6 +70,57 @@ public class PlayingArea {
         } while (is_spot_taken(x, y));
         grid[y][x] = 4;
 
+    }
+
+    private boolean is_in_boundries(int x, int y) {
+        if (x < 0 || x > h_size || y < 0 || y > v_size){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean check_coords(int x, int y){
+        if (grid[y][x] != 1 && is_in_boundries(x, y)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void prepare_snake_move(){
+        int[] snake_head = controller.snake.get_snake_head_coords();
+        char direction = controller.snake.get_direction();
+        boolean can_snake_move = false;
+        int temp_x = snake_head[0];
+        int temp_y = snake_head[1];
+        switch (direction) {
+            case 'r':
+                temp_x++;
+                can_snake_move = check_coords(temp_x, temp_y);
+                break;
+            case 'u':
+                temp_y++;
+                can_snake_move = check_coords(temp_x, temp_y);
+                break;
+            case 'l':
+                temp_x--;
+                can_snake_move = check_coords(temp_x, temp_y);
+                break;
+            case 'o':
+                temp_y--;
+                can_snake_move = check_coords(temp_x, temp_y);
+                break;
+            default:
+                can_snake_move = false;
+                break;
+        }
+
+        if (can_snake_move){
+            controller.move_snake();
+        } else {
+            //game over
+        }
     }
 
     public void refresh_playing_area(){

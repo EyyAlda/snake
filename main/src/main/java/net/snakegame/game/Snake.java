@@ -8,18 +8,21 @@ package net.snakegame.game;
 public class Snake {
     private int bodyLength;
     private SnakeElement head;
+    int starting_pos_x, starting_pos_y;
 
     /**Speichert die Richtung, in die sich die Schlange bewegen soll (standardmäßig 0, also rechts)
-     * 0 = rechts
-     * 1 = unten
-     * 2 = links
-     * 3 = oben
+     * r = rechts
+     * u = unten
+     * l = links
+     * o = oben
      */
-    private int direction = 0;
+    private char direction = 'r';
 
     public Snake(int starting_x, int starting_y){
         this.bodyLength = 1;
         head = new SnakeElement(bodyLength - 1, starting_x, starting_y);
+        starting_pos_x = starting_x;
+        starting_pos_y = starting_y;
     }
 
     /**Funktion zum Verlängern oder Kürzen der Schlange
@@ -41,39 +44,13 @@ public class Snake {
         return bodyLength;
     }
 
-    public int get_direction(){
+    public char get_direction(){
         return direction;
     }
 
     public int[] get_snake_head_coords() {
         return new int[] {head.x_coord, head.y_coord};
-    }
-
-    private boolean check_coords(int x, int y) {
-            
-    }
-
-
-    private boolean can_snake_move() {
-        int temp_x = head.x_coord;
-        int temp_y = head.y_coord;
-        switch (direction) {
-            case 0:
-                temp_x++;
-                return check_coords(temp_x, head.y_coord);
-            case 1:
-                temp_y++;
-                return check_coords(head.x_coord, temp_y);
-            case 2:
-                temp_x--;
-                return check_coords(temp_x, head.y_coord);
-            case 3:
-                temp_y--;
-                return check_coords(head.x_coord, temp_y);
-        }
-        return false;
-
-    }
+    }  
 
     /**Bewege die Schlange einen Schritt weiter in die Entsprechende Richtung
      * 
@@ -81,19 +58,19 @@ public class Snake {
     public void move_snake() {
         // bewege das erste Element der Schlange in die entsprechende Richtung
         switch (direction) {
-            case 0:
+            case 'r':
                 head.set_prev_coords();
                 head.x_coord++;
                 break;
-            case 1:
+            case 'u':
                 head.set_prev_coords();
                 head.y_coord++;
                 break;
-            case 2:
+            case 'l':
                 head.set_prev_coords();
                 head.x_coord--;
                 break;
-            case 3:
+            case 'o':
                 head.set_prev_coords();
                 head.y_coord--;
                 break;

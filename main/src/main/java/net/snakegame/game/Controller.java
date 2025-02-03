@@ -18,4 +18,8 @@ Snake snake = null;
     public boolean check_for_snake_position(int x, int y){
         return snake.is_snake_at_position(x, y);
     }
+
+    public void move_snake(){
+        snake.move_snake();
+    }
 }
