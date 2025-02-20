@@ -22,21 +22,21 @@ Snake snake = null;
     public void FilesDownloader() {
         try {
             // Basisverzeichnis definieren wie in der GUI
-            String baseDir = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake";
-            String soundsDir = baseDir + "/Sounds";
+            String basepathDir = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake";
+            String soundspathDir = basepathDir + "/Sounds";
 
             // Erstelle einen Downloader mit dem Zielverzeichnis
-            FilesManager downloader = new FilesManager(soundsDir);
+            FilesManager downloader = new FilesManager(soundspathDir);
 
             // Erwartete Dateien im Sounds-Verzeichnis
             String[] expectedFiles = {
-                    soundsDir + "/8bitGameMusic.wav",
-                    soundsDir + "/GameMusic1.wav",
-                    soundsDir + "/GameMusic2.wav",
-                    soundsDir + "/MenuMusic.wav",
-                    soundsDir + "/eating.wav",
-                    soundsDir + "/KlickSound.wav",
-                    soundsDir + "/SoundGameOver.wav"
+                    soundspathDir + "/8bitGameMusic.wav",
+                    soundspathDir + "/GameMusic1.wav",
+                    soundspathDir + "/GameMusic2.wav",
+                    soundspathDir + "/MenuMusic.wav",
+                    soundspathDir + "/eating.wav",
+                    soundspathDir + "/KlickSound.wav",
+                    soundspathDir + "/SoundGameOver.wav"
             };
 
             // Überprüfen, ob alle Dateien vorhanden sind mit FilesManager Methode
@@ -49,7 +49,7 @@ Snake snake = null;
                 Path downloadedFile = downloader.downloadFile("https://www.dropbox.com/scl/fo/npfrtm8vqyw878ei8y633/AKrgLugXbWuGID86Ky6kY_4?rlkey=s93dzqnrp1nu7nbf7utmk09i5&st=iken0jhe&dl=1");
 
                 // Entpacke die ZIP-Datei direkt in das Sounds-Verzeichnis
-                downloader.extractZip(downloadedFile.toString(), soundsDir);
+                downloader.extractZip(downloadedFile.toString(), soundspathDir);
 
                 // Nach dem Entpacken noch einmal prüfen, ob alle Dateien jetzt vorhanden sind
                 if (downloader.checkFilesExist(expectedFiles)) {

@@ -30,7 +30,7 @@ public class FilesManager {
         for (String filePath : expectedFiles) {
             File file = new File(filePath);
             if (!file.exists()) {
-                System.err.println("Datei fehlt: " + filePath);
+                System.err.println("Datei nicht vorhanden: " + filePath);
                 allFilesExist = false; // Wenn eine Datei fehlt, setze dies auf false
             }
         }
