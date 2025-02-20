@@ -25,6 +25,19 @@ public class FilesManager {
         Files.createDirectories(downloadDir);
     }
 
+    public boolean checkFilesExist(String[] expectedFiles) {
+        boolean allFilesExist = true;
+        for (String filePath : expectedFiles) {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                System.err.println("Datei fehlt: " + filePath);
+                allFilesExist = false; // Wenn eine Datei fehlt, setze dies auf false
+            }
+        }
+        return allFilesExist; // Gibt true zurück, wenn alle Dateien vorhanden sind
+    }
+
+
     public Path downloadFile(String url) throws IOException {
         URL fileUrl = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) fileUrl.openConnection();
@@ -137,4 +150,5 @@ public class FilesManager {
                 .replaceAll("^\\.+", "") // Entferne führende Punkte
                 .replaceAll("/\\.+/", "/"); // Entferne versteckte Verzeichnisse
     }
+
 }

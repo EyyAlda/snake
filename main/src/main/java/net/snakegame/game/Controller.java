@@ -28,13 +28,7 @@ Snake snake = null;
             // Erstelle einen Downloader mit dem Zielverzeichnis
             FilesManager downloader = new FilesManager(soundsDir);
 
-            // Lade die Datei herunter
-            Path downloadedFile = downloader.downloadFile("https://www.dropbox.com/scl/fo/npfrtm8vqyw878ei8y633/AKrgLugXbWuGID86Ky6kY_4?rlkey=s93dzqnrp1nu7nbf7utmk09i5&st=iken0jhe&dl=1");
-
-            // Entpacke die ZIP-Datei direkt in das Sounds-Verzeichnis
-            downloader.extractZip(downloadedFile.toString(), soundsDir);
-
-            // Überprüfe, ob alle erwarteten Sound-Dateien vorhanden sind
+            // Erwartete Dateien im Sounds-Verzeichnis
             String[] expectedFiles = {
                     soundsDir + "/8bitGameMusic.wav",
                     soundsDir + "/GameMusic1.wav",
@@ -45,10 +39,23 @@ Snake snake = null;
                     soundsDir + "/SoundGameOver.wav"
             };
 
-            // Optional: Überprüfung der extrahierten Dateien
-            for (String file : expectedFiles) {
-                if (!new File(file).exists()) {
-                    System.err.println("Warnung: Datei nicht gefunden: " + file);
+            // Überprüfen, ob alle Dateien vorhanden sind mit FilesManager Methode
+            if (downloader.checkFilesExist(expectedFiles)) {
+                System.out.println("Alle Dateien sind vorhanden, kein Download erforderlich.");
+            } else {
+                System.out.println("Eine oder mehrere Dateien fehlen, starte den Download...");
+
+                // Lade die Datei herunter
+                Path downloadedFile = downloader.downloadFile("https://www.dropbox.com/scl/fo/npfrtm8vqyw878ei8y633/AKrgLugXbWuGID86Ky6kY_4?rlkey=s93dzqnrp1nu7nbf7utmk09i5&st=iken0jhe&dl=1");
+
+                // Entpacke die ZIP-Datei direkt in das Sounds-Verzeichnis
+                downloader.extractZip(downloadedFile.toString(), soundsDir);
+
+                // Nach dem Entpacken noch einmal prüfen, ob alle Dateien jetzt vorhanden sind
+                if (downloader.checkFilesExist(expectedFiles)) {
+                    System.out.println("Alle Dateien erfolgreich heruntergeladen und entpackt.");
+                } else {
+                    System.err.println("Es fehlen weiterhin Dateien nach dem Download.");
                 }
             }
 
@@ -57,6 +64,8 @@ Snake snake = null;
             e.printStackTrace();
         }
     }
+
+
 
     public boolean check_for_snake_position(int x, int y){
         return snake.is_snake_at_position(x, y);
