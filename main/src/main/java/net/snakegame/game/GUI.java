@@ -1,5 +1,10 @@
 package net.snakegame.game;
 
+/** Klasse mit den Daten für die Schlange auf dem Spielfeld
+ * @author Nick Gegenheimer
+ *
+ */
+
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.app.MenuItem;
@@ -47,12 +52,12 @@ public class GUI extends GameApplication {
     private static MediaPlayer backgroundMusicPlayer;
     private static int currentTrackIndex = 0;
     private static final String[] MUSIC_TRACKS = {
-            Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/8bitGameMusic.wav",
-            Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic1.wav",
-            Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic2.wav"
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/8bitGameMusic.wav",
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic1.wav",
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic2.wav"
     };
     private static MediaPlayer menuMusicPlayer;
-    private static final String MENU_MUSIC_TRACK = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/MenuMusic.wav";
+    private static final String MENU_MUSIC_TRACK = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/MenuMusic.wav";
     private static int GRID_SIZE_X;
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
