@@ -6,9 +6,17 @@ public class PlayingArea {
      * Größenpreset identfier für die 3 standard Spielfeldgrößen
      */
     public static enum Size {
-        LARGE,
-        MEDIUM,
-        SMALL
+        LARGE(25, 20),
+        MEDIUM(20, 16),
+        SMALL(15, 12);
+
+        private int height;
+        private int length;
+
+        private Size(int height, int length){
+            this.height = height;
+            this.length = length;
+        }
     }
 
     /**
