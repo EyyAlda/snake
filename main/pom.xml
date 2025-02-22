@@ -38,7 +38,7 @@
                     <jlinkImageName>game</jlinkImageName>
                     <jlinkZipName>fxgl-game</jlinkZipName>
                     <mainClass>${mainClassName}</mainClass>
-                    <module>${javafx.main.module}</module>  <!-- Add this line -->
+                    <module>${javafx.main.module}</module>
                 </configuration>
             </plugin>
         </plugins>

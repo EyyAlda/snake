@@ -22,4 +22,8 @@ Snake snake = null;
     public void move_snake(){
         snake.move_snake();
     }
+
+    public int[][] getGrid(){
+        return area.getGrid();
+    }
 }
