@@ -71,7 +71,7 @@ public class Files {
      * @param dirType
      * @return String
      */
-    private static String getXdgUserDir(DirectoryType dirType) {
+    static String getXdgUserDir(DirectoryType dirType) {
         String command = "xdg-user-dir " + dirType.toString();
         try {
             Process process = Runtime.getRuntime().exec(command);
