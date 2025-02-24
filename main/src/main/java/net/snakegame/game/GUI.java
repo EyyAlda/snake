@@ -4,6 +4,9 @@ package net.snakegame.game;
  * @author Nick Gegenheimer
  *
  */
+import java.io.File;
+import java.util.EnumSet;
+
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
@@ -13,27 +16,27 @@ import com.almasb.fxgl.app.scene.MenuType;
 import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
-import javafx.scene.effect.DropShadow;
-import javafx.animation.Timeline;
+
 import javafx.animation.KeyFrame;
-import javafx.util.Duration;
-import javafx.scene.shape.Circle;
-import javafx.scene.layout.HBox;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import java.io.File;
-import java.util.EnumSet;
-import javafx.scene.media.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class GUI extends GameApplication {
     private Entity player;
@@ -216,14 +219,14 @@ public class GUI extends GameApplication {
             if(isSoundOn){
                 switch (soundId){
                     case 0:
-                        String soundEating = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/eating.wav";
+                        String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/eating.wav";
                         Media sound0 = new Media(new File (soundEating).toURI().toString());
                         MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
                         mediaPlayer0.play();
                         break;
 
                     case 1:
-                        String soundButton = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/KlickSound.wav";
+                        String soundButton = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/KlickSound.wav";
                         Media sound1 = new Media(new File(soundButton).toURI().toString());
                         MediaPlayer mediaPlayer1 = new MediaPlayer(sound1);
                         mediaPlayer1.play();
@@ -231,7 +234,7 @@ public class GUI extends GameApplication {
                         break;
 
                     case 2:
-                        String soundGameOver = Files.getXdgUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/SoundGameOver.wav";
+                        String soundGameOver = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/SoundGameOver.wav";
                         Media sound2 = new Media(new File(soundGameOver).toURI().toString());
                         MediaPlayer mediaPlayer2 = new MediaPlayer(sound2);
                         mediaPlayer2.play();
@@ -620,15 +623,14 @@ public class GUI extends GameApplication {
 
         // Snake-themed animated background
         Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 30, 0));
-        FXGL.getGameScene().addUINode(bg);
+        //FXGL.getGameScene().addUINode(bg);
 
         // Add animated circles similar to the main menu
         for (int i = 0; i < 12; i++) {
-            Circle snakeScale = new Circle(3 + Math.random() * 5,
-                    Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
+            Circle snakeScale = new Circle(3 + Math.random() * 5, Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
             snakeScale.setTranslateX(Math.random() * screenWidth);
             snakeScale.setTranslateY(Math.random() * screenHeight);
-            FXGL.getGameScene().addUINode(snakeScale);
+            //FXGL.getGameScene().addUINode(snakeScale);
 
             Timeline timeline = new Timeline(
                     new KeyFrame(Duration.seconds(2 + Math.random() * 3), e -> {
@@ -727,7 +729,7 @@ public class GUI extends GameApplication {
         gameContainer.setTranslateX((screenWidth - (totalGridWidth + 240)) / 2);
         gameContainer.setTranslateY((screenHeight - totalGridHeight) / 2);
 
-        FXGL.getGameScene().addUINode(gameContainer);
+        //FXGL.getGameScene().addUINode(gameContainer);
 
         // Player as a snake segment
         player = FXGL.entityBuilder()

@@ -6,9 +6,17 @@ public class PlayingArea {
      * Größenpreset identfier für die 3 standard Spielfeldgrößen
      */
     public static enum Size {
-        LARGE,
-        MEDIUM,
-        SMALL
+        LARGE(25, 20),
+        MEDIUM(20, 16),
+        SMALL(15, 12);
+
+        private int height;
+        private int length;
+
+        private Size(int height, int length){
+            this.height = height;
+            this.length = length;
+        }
     }
 
     /**
@@ -58,6 +66,10 @@ public class PlayingArea {
         return false;
     }
 
+    public int[][] getGrid(){
+        return grid;
+    }
+
     /** Plaziert eine Frucht zufällig auf dem Spielfeld
      * @author Lennard Rütten
      */
@@ -87,7 +99,7 @@ public class PlayingArea {
             return false;
         }
     }
-
+/*
     public void prepare_snake_move(){
         int[] snake_head = controller.snake.get_snake_head_coords();
         char direction = controller.snake.get_direction();
@@ -121,6 +133,10 @@ public class PlayingArea {
         } else {
             //game over
         }
+    }
+*/
+    public void updateAtPosition(int x, int y, int value){
+        grid[y][x] = value;
     }
 
     public void refresh_playing_area(){
