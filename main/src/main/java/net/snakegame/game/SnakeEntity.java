@@ -17,7 +17,6 @@ public class SnakeEntity {
     private Entity head;
     private Elements elements;
 
-    private GridMovement grid_movement;
     
 
     public SnakeEntity(int starting_x, int starting_y, int[][] playing_grid, Controller pController) {
@@ -25,11 +24,9 @@ public class SnakeEntity {
         this.starting_pos_y = starting_y;
         this.playing_area = playing_grid;
         this.controller = pController;
-        grid_movement = new GridMovement(playing_grid);
     }
 
     public void create_snake() {
-        head = FXGL.entityBuilder().at(starting_pos_x, starting_pos_y).viewWithBBox(new Rectangle(38, 38, Color.BLUE)).with(grid_movement).buildAndAttach();
         elements = new Elements(starting_pos_y, starting_pos_x, new Point2D(1, 0), null);
     }
 
@@ -42,7 +39,7 @@ public class SnakeEntity {
 
     }
     
-    private class Elements {
+    public class Elements {
         int length;
         int pos_x, pos_y;
         Entity entity;
@@ -57,7 +54,7 @@ public class SnakeEntity {
             pos_y = starting_y;
             vector = pVector;
             next = null;
-            entity = FXGL.entityBuilder().at(starting_x, starting_y).viewWithBBox(new Rectangle(38, 38, Color.BLUE)).with(grid_movement).buildAndAttach();
+            entity = FXGL.entityBuilder().at(starting_x, starting_y).viewWithBBox(new Rectangle(38, 38, Color.BLUE)).with(new GridMovement(38, controller, this)).buildAndAttach();
             Elements temp = prev;
             Elements temp_prev = temp.prev;
             while (temp_prev != null){

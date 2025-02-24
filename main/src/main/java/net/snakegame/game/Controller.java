@@ -3,6 +3,7 @@ package net.snakegame.game;
 public class Controller {
 PlayingArea area = null;
 Snake snake = null;
+public boolean gameOver = false;
 
     public void create_playing_area(PlayingArea.Size size){
         area = new PlayingArea(size, this);
@@ -25,5 +26,9 @@ Snake snake = null;
 
     public int[][] getGrid(){
         return area.getGrid();
+    }
+
+    public void updateGridAtPosition(int x, int y, int value){
+        area.updateAtPosition(x, y, value);
     }
 }

@@ -12,33 +12,57 @@ public class GridMovement extends Component {
     private Direction currentDirection = Direction.NONE;
     private Controller controller;
     private final int MOVEMENT_SPEED = 5;
+    private int currentGridX, currentGridY, nextGridX, nextGridY;
+    private SnakeEntity.Elements element;
+    private boolean isMoving;
+    private Direction direction;
+    private Direction next_direction;
 
 
-    public GridMovement(int[][] grid, int grid_size, Controller controller){
-        this.grid = grid;
+    public GridMovement(int grid_size, Controller controller, SnakeEntity.Elements pElement){
         GRID_SIZE = grid_size;
         this.controller = controller;
+        element = pElement;
     }
 
     @Override
     public void onUpdate(double tpf){
-
+        if (!controller.gameOver && isMoving){
+            grid = controller.getGrid();
+            moveTowardsTarget();
+        } else if (!controller.gameOver && !isMoving) {
+            move();
+        }
     }
 
-    public void move(Direction direction) {
+    private Direction getNextDirection(){
+        for (Direction dir : Direction.values()) {
+            if (dir.dx == element.prev.vector.getX() && dir.dy == element.prev.vector.getY()){
+                return dir;
+            }
+        }
+        return Direction.NONE;
+    }
+
+    public void move() {
+        isMoving = true;
+        direction = next_direction;
+        next_direction = getNextDirection();
         currentDirection = direction;
 
-        int currentGridX = (int) (entity.getX() / GRID_SIZE);
-        int currentGridY = (int) (entity.getY() / GRID_SIZE);
+        currentGridX = (int) (entity.getX() / GRID_SIZE);
+        currentGridY = (int) (entity.getY() / GRID_SIZE);
 
-        int nextGridX = currentGridX + direction.dx;
-        int nextGridY = currentGridY + direction.dy;
+        nextGridX = currentGridX + direction.dx;
+        nextGridY = currentGridY + direction.dy;
 
         if (isValidMove(nextGridX, nextGridY)){
             targetPosition = new Point2D(
                     nextGridX * GRID_SIZE,
                     nextGridY * GRID_SIZE
                     );
+        } else {
+            controller.gameOver = true;
         }
 
     }
@@ -48,7 +72,7 @@ public class GridMovement extends Component {
             return false;
         }
 
-        return grid[gridY][gridX] != 1;
+        return grid[gridY][gridX] != 2;
     }
 
     private void moveTowardsTarget(){
@@ -62,9 +86,18 @@ public class GridMovement extends Component {
             Math.abs(entity.getY() - targetPosition.getY()) < MOVEMENT_SPEED) {
             // Snap to grid
             entity.setPosition(targetPosition);
-
-            currentDirection = Direction.NONE;
+            updatePositions();
+            isMoving = false;
             }
+    }
+
+    private void updatePositions(){
+        controller.updateGridAtPosition(currentGridX, currentGridY, 0);
+        controller.updateGridAtPosition(nextGridX, nextGridY, 2);
+        currentGridX = nextGridX;
+        currentGridY = nextGridY;
+        element.pos_x = nextGridX;
+        element.pos_y = nextGridY;
     }
 
 }
