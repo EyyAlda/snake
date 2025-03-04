@@ -7,7 +7,6 @@ package net.snakegame.game;
 import java.io.File;
 import java.util.EnumSet;
 
-
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.app.MenuItem;
@@ -64,8 +63,15 @@ public class GUI extends GameApplication {
     private static int GRID_SIZE_X;
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
-    private Game game;
+    private SnakeEntity snake;
+    private Controller controller;
 
+
+    public GUI(Controller pController){
+        this.controller = pController;
+    }
+
+    public GUI(){}
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -617,6 +623,14 @@ public class GUI extends GameApplication {
         GRID_SIZE_Y = gridHeight;
         CELL_SIZE = cellSize;
 
+        int[] size = controller.area.get_playing_area_size();
+        int starting_y = size[1] / 2;
+        int starting_x = (int) Math.round(size[0] * 0.3);
+
+        snake = new SnakeEntity(starting_x, starting_y, controller);
+
+        snake.create_snake();
+
 
         int totalGridWidth = cellSize * gridWidth;
         int totalGridHeight = cellSize * gridHeight;
@@ -741,29 +755,24 @@ public class GUI extends GameApplication {
     @Override
     protected void initInput() {
         FXGL.onKey(upKey, () -> {
-            player.translateY(-5); 
-            game.set_direction(new Point2D(0, -1));
+            snake.setDirection(new Point2D(0, -1));
         });
         FXGL.onKey(downKey, () -> {
-            player.translateY(5);
-            game.set_direction(new Point2D(0, 1));
+            snake.setDirection(new Point2D(0, 1));
         });
         FXGL.onKey(leftKey, () -> {
-            player.translateX(-5);
-            game.set_direction(new Point2D(-1, 0));
+            snake.setDirection(new Point2D(-1, 0));
         });
         FXGL.onKey(rightKey, () -> {
-            player.translateX(5);
-            game.set_direction(new Point2D(1, 0));
+            snake.setDirection(new Point2D(1, 0));
         });
         FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
-            game.set_direction(new Point2D(0, 0));
+            snake.setDirection(new Point2D(0, 0));
             FXGL.getGameController().gotoMainMenu();
         });
     }
 
     public void start_gui(String[] args) {
-
         launch(args);
     }
 
@@ -773,5 +782,9 @@ public class GUI extends GameApplication {
 
     public int get_cell_size(){
         return CELL_SIZE;
+    }
+
+    public Point2D getDirection() {
+        return snake.getDirection();
     }
 }

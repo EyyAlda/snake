@@ -1,13 +1,28 @@
 package net.snakegame.game;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import javafx.geometry.Point2D;
 
 public class Controller {
 PlayingArea area = null;
 Snake snake = null;
 public boolean gameOver = false;
+GUI gui;
+TestGUI testGUI;
+
+    public Controller(){}
+
+    public Controller(TestGUI gui){
+        this.testGUI = gui;        
+    }
+
+    public void startGame(String[] args){
+        FilesDownloader();
+        gui = new GUI(this);
+        gui.start_gui(args);
+    }
 
     public void create_playing_area(PlayingArea.Size size){
         area = new PlayingArea(size, this);
@@ -82,5 +97,8 @@ public boolean gameOver = false;
 
     public void updateGridAtPosition(int x, int y, int value){
         area.updateAtPosition(x, y, value);
+    }
+    public Point2D getHeadDirection(){
+        return gui.getDirection();
     }
 }
