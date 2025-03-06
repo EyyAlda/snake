@@ -1,25 +1,29 @@
 package net.snakegame.game;
 
+import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
+
 /** Klasse mit den Daten für die Schlange auf dem Spielfeld
  * @author Nick Gegenheimer
  *
  */
 import java.io.File;
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.app.MenuItem;
 import com.almasb.fxgl.app.scene.FXGLMenu;
+import com.almasb.fxgl.app.scene.LoadingScene;
 import com.almasb.fxgl.app.scene.MenuType;
 import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.ui.ProgressBar;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -54,17 +58,20 @@ public class GUI extends GameApplication {
     private static MediaPlayer backgroundMusicPlayer;
     private static int currentTrackIndex = 0;
     private static final String[] MUSIC_TRACKS = {
-            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/8bitGameMusic.wav",
-            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic1.wav",
-            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic2.wav"
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/8bitGameMusic.wav",
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/GameMusic1.wav",
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/GameMusic2.wav"
     };
     private static MediaPlayer menuMusicPlayer;
-    private static final String MENU_MUSIC_TRACK = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/MenuMusic.wav";
+    private static final String MENU_MUSIC_TRACK = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/MenuMusic.wav";
     private static int GRID_SIZE_X;
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
-    private SnakeEntity snake;
+    private Game snake;
     private Controller controller;
+    // Flag to track download state
+    private static AtomicBoolean resourcesReady = new AtomicBoolean(false);
+    private static AtomicBoolean downloadInProgress = new AtomicBoolean(false);
 
 
     public GUI(Controller pController){
@@ -80,9 +87,46 @@ public class GUI extends GameApplication {
         settings.setTitle("Snake Game");
         settings.setMainMenuEnabled(true);
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
-        settings.setSceneFactory(new CustomSceneFactory());
         settings.setManualResizeEnabled(true);
         settings.setPreserveResizeRatio(true);
+        // Set a longer loading time to allow for potential downloads
+        
+        // Combined scene factory that handles both download and game scenes
+        settings.setSceneFactory(new CombinedSceneFactory());
+        
+        controller = new Controller();
+        // Create the files manager and check if download is needed
+
+        if (controller.checkFiles()) {
+            // Resources already exist, mark as ready
+            resourcesReady.set(true);
+        } else {
+            // Resources need to be downloaded
+            downloadInProgress.set(true);
+        }
+    }
+
+/**
+     * Combined scene factory that handles both download and game scenes
+     */
+    private class CombinedSceneFactory extends SceneFactory {
+        private final CustomSceneFactory customSceneFactory = new CustomSceneFactory();
+        
+        @Override
+        public LoadingScene newLoadingScene() {
+            // If we need to download resources, show the download progress scene
+            //if (downloadInProgress.get()) {
+            //    return new ResourceLoadingScene();
+            //}
+            
+            // Otherwise, delegate to the custom scene factory
+            return customSceneFactory.newLoadingScene();
+        }
+        
+        @Override
+        public FXGLMenu newMainMenu() {
+            return customSceneFactory.newMainMenu();
+        }
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -92,6 +136,39 @@ public class GUI extends GameApplication {
         }
     }
 
+/**
+     * Custom loading scene with progress bar for resource download
+     */
+    private static class ResourceLoadingScene extends LoadingScene {
+        private ProgressBar progressBar;
+        private Text statusText;
+
+        public ResourceLoadingScene() {
+            // Create the progress UI
+            progressBar = new ProgressBar();
+            progressBar.setWidth(400);
+            
+            statusText = new Text("Preparing to download resources...");
+            statusText.setFill(Color.WHITE);
+            
+            VBox vbox = new VBox(10);
+            vbox.getChildren().addAll(progressBar, statusText);
+            
+            // Center the progress UI
+            vbox.setTranslateX(FXGL.getAppWidth() / 2 - 200);
+            vbox.setTranslateY(FXGL.getAppHeight() / 2 - 50);
+            
+            getContentRoot().getChildren().add(vbox);
+        }
+
+        public void updateProgress(double progress) {
+            progressBar.setCurrentValue(progress);
+        }
+
+        public void updateStatus(String status) {
+            statusText.setText(status);
+        }
+    }
     private void initMenuMusic() {
         try {
             if (menuMusicPlayer != null) {
@@ -225,14 +302,14 @@ public class GUI extends GameApplication {
             if(isSoundOn){
                 switch (soundId){
                     case 0:
-                        String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/eating.wav";
+                        String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/eating.wav";
                         Media sound0 = new Media(new File (soundEating).toURI().toString());
                         MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
                         mediaPlayer0.play();
                         break;
 
                     case 1:
-                        String soundButton = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/KlickSound.wav";
+                        String soundButton = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/KlickSound.wav";
                         Media sound1 = new Media(new File(soundButton).toURI().toString());
                         MediaPlayer mediaPlayer1 = new MediaPlayer(sound1);
                         mediaPlayer1.play();
@@ -240,7 +317,7 @@ public class GUI extends GameApplication {
                         break;
 
                     case 2:
-                        String soundGameOver = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/SoundGameOver.wav";
+                        String soundGameOver = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/SoundGameOver.wav";
                         Media sound2 = new Media(new File(soundGameOver).toURI().toString());
                         MediaPlayer mediaPlayer2 = new MediaPlayer(sound2);
                         mediaPlayer2.play();
@@ -603,7 +680,6 @@ public class GUI extends GameApplication {
         initBackgroundMusic();
         int screenWidth = 900;
         int screenHeight = 700;
-        int cellSize = 25;
         int gridWidth, gridHeight;
         gridHeight = switch (selectedSize) {
             case "Small" -> {
@@ -621,19 +697,15 @@ public class GUI extends GameApplication {
         };
         GRID_SIZE_X = gridWidth;
         GRID_SIZE_Y = gridHeight;
-        CELL_SIZE = cellSize;
+        CELL_SIZE = (int) 400 / gridWidth;
 
-        int[] size = controller.area.get_playing_area_size();
-        int starting_y = size[1] / 2;
-        int starting_x = (int) Math.round(size[0] * 0.3);
+        snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X);
 
-        snake = new SnakeEntity(starting_x, starting_y, controller);
-
-        snake.create_snake();
+        getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
 
 
-        int totalGridWidth = cellSize * gridWidth;
-        int totalGridHeight = cellSize * gridHeight;
+        int totalGridWidth = CELL_SIZE * gridWidth;
+        int totalGridHeight = CELL_SIZE * gridHeight;
 
         // Snake-themed animated background
         Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 30, 0));
@@ -675,7 +747,7 @@ public class GUI extends GameApplication {
             HBox row = new HBox(0);
             row.setAlignment(Pos.CENTER);
             for (int j = 0; j < gridWidth; j++) {
-                Rectangle cell = new Rectangle(cellSize, cellSize);
+                Rectangle cell = new Rectangle(CELL_SIZE, CELL_SIZE);
                 if ((i + j) % 2 == 0) {
                     cell.setFill(Color.rgb(144, 238, 144)); // Medium sea green
                 } else {
@@ -746,33 +818,36 @@ public class GUI extends GameApplication {
         //FXGL.getGameScene().addUINode(gameContainer);
 
         // Player as a snake segment
-        player = FXGL.entityBuilder()
-                .at(gameContainer.getTranslateX() + (totalGridWidth / 2),
-                        gameContainer.getTranslateY() + (totalGridHeight / 2))
-                .view(new Rectangle(cellSize, cellSize, Color.rgb(34, 139, 34, 0.9))) // Forest green
-                .buildAndAttach();
+        //player = FXGL.entityBuilder()
+        //        .at(gameContainer.getTranslateX() + (totalGridWidth / 2),
+        //                gameContainer.getTranslateY() + (totalGridHeight / 2))
+        //        .view(new Rectangle(CELL_SIZE, CELL_SIZE, Color.rgb(34, 139, 34, 0.9))) // Forest green
+        //        .buildAndAttach();
     }
+
     @Override
     protected void initInput() {
         FXGL.onKey(upKey, () -> {
-            snake.setDirection(new Point2D(0, -1));
+            if (snake.getDirection() != Direction.DOWN) snake.updateDirection(Direction.UP);
         });
         FXGL.onKey(downKey, () -> {
-            snake.setDirection(new Point2D(0, 1));
+            if (snake.getDirection() != Direction.UP) snake.updateDirection(Direction.DOWN);
         });
         FXGL.onKey(leftKey, () -> {
-            snake.setDirection(new Point2D(-1, 0));
+            if (snake.getDirection() != Direction.RIGHT) snake.updateDirection(Direction.LEFT);
         });
         FXGL.onKey(rightKey, () -> {
-            snake.setDirection(new Point2D(1, 0));
+            if (snake.getDirection() != Direction.LEFT) snake.updateDirection(Direction.RIGHT);
         });
-        FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
-            snake.setDirection(new Point2D(0, 0));
+        /*FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
+            snake.updateDirection(Direction.NONE);
             FXGL.getGameController().gotoMainMenu();
-        });
+        });*/
     }
 
-    public void start_gui(String[] args) {
+    public static void start_gui(String[] args) {
+        //Controller controller = new Controller();
+        //controller.FilesDownloader();
         launch(args);
     }
 
@@ -784,7 +859,9 @@ public class GUI extends GameApplication {
         return CELL_SIZE;
     }
 
-    public Point2D getDirection() {
-        return snake.getDirection();
+    @Override
+    protected void onPreInit() {
+        controller.FilesDownloader();
     }
+
 }

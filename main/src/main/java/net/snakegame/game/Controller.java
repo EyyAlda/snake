@@ -3,16 +3,34 @@ package net.snakegame.game;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javafx.geometry.Point2D;
-
 public class Controller {
-PlayingArea area = null;
-Snake snake = null;
-public boolean gameOver = false;
-GUI gui;
-TestGUI testGUI;
+    public boolean gameOver = false;
+    GUI gui;
+    TestGUI testGUI;
 
-    public Controller(){}
+    // Basisverzeichnis definieren wie in der GUI
+    String basepathDir = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake";
+    String soundspathDir = basepathDir + "/Sounds";
+    FilesManager downloader;
+
+    // Erstelle einen Downloader mit dem Zielverzeichnis
+    String[] expectedFiles = {
+        soundspathDir + "/8bitGameMusic.wav",
+        soundspathDir + "/GameMusic1.wav",
+        soundspathDir + "/GameMusic2.wav",
+        soundspathDir + "/MenuMusic.wav",
+        soundspathDir + "/eating.wav",
+        soundspathDir + "/KlickSound.wav",
+        soundspathDir + "/SoundGameOver.wav"
+    };
+
+    public Controller(){
+        try {
+            downloader = new FilesManager(soundspathDir);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public Controller(TestGUI gui){
         this.testGUI = gui;        
@@ -23,37 +41,15 @@ TestGUI testGUI;
         gui = new GUI(this);
         gui.start_gui(args);
     }
-
-    public void create_playing_area(PlayingArea.Size size){
-        area = new PlayingArea(size, this);
-    }
-
-    public void create_snake(){
-        int[] size = area.get_playing_area_size();
-        int starting_y = size[1] / 2;
-        int starting_x = (int) Math.round(size[0] * 0.3);
-        snake = new Snake(starting_x, starting_y);
+    
+    public boolean checkFiles(){
+        return downloader.checkFilesExist(expectedFiles);
     }
 
     public void FilesDownloader() {
         try {
-            // Basisverzeichnis definieren wie in der GUI
-            String basepathDir = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake";
-            String soundspathDir = basepathDir + "/Sounds";
-
-            // Erstelle einen Downloader mit dem Zielverzeichnis
-            FilesManager downloader = new FilesManager(soundspathDir);
 
             // Erwartete Dateien im Sounds-Verzeichnis
-            String[] expectedFiles = {
-                    soundspathDir + "/8bitGameMusic.wav",
-                    soundspathDir + "/GameMusic1.wav",
-                    soundspathDir + "/GameMusic2.wav",
-                    soundspathDir + "/MenuMusic.wav",
-                    soundspathDir + "/eating.wav",
-                    soundspathDir + "/KlickSound.wav",
-                    soundspathDir + "/SoundGameOver.wav"
-            };
 
             // Überprüfen, ob alle Dateien vorhanden sind mit FilesManager Methode
             if (downloader.checkFilesExist(expectedFiles)) {
@@ -79,26 +75,5 @@ TestGUI testGUI;
             System.err.println("Fehler: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-
-
-    public boolean check_for_snake_position(int x, int y){
-        return snake.is_snake_at_position(x, y);
-    }
-
-    public void move_snake(){
-        snake.move_snake();
-    }
-
-    public int[][] getGrid(){
-        return area.getGrid();
-    }
-
-    public void updateGridAtPosition(int x, int y, int value){
-        area.updateAtPosition(x, y, value);
-    }
-    public Point2D getHeadDirection(){
-        return gui.getDirection();
     }
 }

@@ -10,7 +10,7 @@ public class TestGUI extends GameApplication {
 
     Controller controller = null;
     int[][] grid = new int[15][12];
-    SnakeEntity snake = null;
+    Game snake = null;
 
     @Override
     protected void initSettings(GameSettings settings){
@@ -23,7 +23,7 @@ public class TestGUI extends GameApplication {
     protected void initGame(){
         controller = new Controller(this);
         //controller.FilesDownloader();
-        snake = new SnakeEntity(5, 3, controller);        
+        snake = new Game(5, 3, 20, 15, 15);        
         //snake.create_snake();
     }
 
