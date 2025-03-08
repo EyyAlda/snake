@@ -57,11 +57,13 @@ public class Controller {
             } else {
                 System.out.println("Eine oder mehrere Dateien fehlen, starte den Download...");
 
+
                 // Lade die Datei herunter
                 Path downloadedFile = downloader.downloadFile("https://www.dropbox.com/scl/fo/npfrtm8vqyw878ei8y633/AKrgLugXbWuGID86Ky6kY_4?rlkey=s93dzqnrp1nu7nbf7utmk09i5&st=iken0jhe&dl=1");
 
                 // Entpacke die ZIP-Datei direkt in das Sounds-Verzeichnis
                 downloader.extractZip(downloadedFile.toString(), soundspathDir);
+
 
                 // Nach dem Entpacken noch einmal prüfen, ob alle Dateien jetzt vorhanden sind
                 if (downloader.checkFilesExist(expectedFiles)) {
@@ -69,6 +71,7 @@ public class Controller {
                 } else {
                     System.err.println("Es fehlen weiterhin Dateien nach dem Download.");
                 }
+                
             }
 
         } catch (IOException e) {

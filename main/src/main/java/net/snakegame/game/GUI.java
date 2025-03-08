@@ -89,44 +89,12 @@ public class GUI extends GameApplication {
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
         settings.setManualResizeEnabled(true);
         settings.setPreserveResizeRatio(true);
+        settings.setSceneFactory(new CustomSceneFactory());
         // Set a longer loading time to allow for potential downloads
         
         // Combined scene factory that handles both download and game scenes
-        settings.setSceneFactory(new CombinedSceneFactory());
-        
         controller = new Controller();
-        // Create the files manager and check if download is needed
 
-        if (controller.checkFiles()) {
-            // Resources already exist, mark as ready
-            resourcesReady.set(true);
-        } else {
-            // Resources need to be downloaded
-            downloadInProgress.set(true);
-        }
-    }
-
-/**
-     * Combined scene factory that handles both download and game scenes
-     */
-    private class CombinedSceneFactory extends SceneFactory {
-        private final CustomSceneFactory customSceneFactory = new CustomSceneFactory();
-        
-        @Override
-        public LoadingScene newLoadingScene() {
-            // If we need to download resources, show the download progress scene
-            //if (downloadInProgress.get()) {
-            //    return new ResourceLoadingScene();
-            //}
-            
-            // Otherwise, delegate to the custom scene factory
-            return customSceneFactory.newLoadingScene();
-        }
-        
-        @Override
-        public FXGLMenu newMainMenu() {
-            return customSceneFactory.newMainMenu();
-        }
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -846,8 +814,8 @@ public class GUI extends GameApplication {
     }
 
     public static void start_gui(String[] args) {
-        //Controller controller = new Controller();
-        //controller.FilesDownloader();
+        Controller controller = new Controller();
+        controller.FilesDownloader();
         launch(args);
     }
 
@@ -859,9 +827,5 @@ public class GUI extends GameApplication {
         return CELL_SIZE;
     }
 
-    @Override
-    protected void onPreInit() {
-        controller.FilesDownloader();
-    }
 
 }
