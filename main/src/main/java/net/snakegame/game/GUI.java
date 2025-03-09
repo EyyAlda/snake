@@ -1,12 +1,20 @@
 package net.snakegame.game;
 
+import static com.almasb.fxgl.dsl.FXGL.addText;
+import static com.almasb.fxgl.dsl.FXGL.addVarText;
+import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
+import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
+import static com.almasb.fxgl.dsl.FXGL.getGameScene;
+import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
+
 /** Klasse mit den Daten für die Schlange auf dem Spielfeld
  * @author Nick Gegenheimer
  *
  */
 import java.io.File;
 import java.util.EnumSet;
-
+import java.util.Map;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
@@ -20,14 +28,16 @@ import com.almasb.fxgl.entity.Entity;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -55,28 +65,31 @@ public class GUI extends GameApplication {
     private static MediaPlayer backgroundMusicPlayer;
     private static int currentTrackIndex = 0;
     private static final String[] MUSIC_TRACKS = {
-            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/8bitGameMusic.wav",
-            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic1.wav",
-            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/GameMusic2.wav"
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/8bitGameMusic.wav",
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/GameMusic1.wav",
+            Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/GameMusic2.wav"
     };
     private static MediaPlayer menuMusicPlayer;
-    private static final String MENU_MUSIC_TRACK = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/MenuMusic.wav";
+    private static final String MENU_MUSIC_TRACK = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/MenuMusic.wav";
     private static int GRID_SIZE_X;
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
-    private Game game;
+    private Game snake;
 
+
+
+    public GUI(){}
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setWidth(900);
+        settings.setWidth(800);
         settings.setHeight(700);
         settings.setTitle("Snake Game");
         settings.setMainMenuEnabled(true);
         settings.setEnabledMenuItems(EnumSet.of(MenuItem.EXTRA));
-        settings.setSceneFactory(new CustomSceneFactory());
         settings.setManualResizeEnabled(true);
         settings.setPreserveResizeRatio(true);
+        settings.setSceneFactory(new CustomSceneFactory());
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -85,6 +98,7 @@ public class GUI extends GameApplication {
             return new SnakeMainMenu();
         }
     }
+
 
     private void initMenuMusic() {
         try {
@@ -219,14 +233,14 @@ public class GUI extends GameApplication {
             if(isSoundOn){
                 switch (soundId){
                     case 0:
-                        String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/eating.wav";
+                        String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/eating.wav";
                         Media sound0 = new Media(new File (soundEating).toURI().toString());
                         MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
                         mediaPlayer0.play();
                         break;
 
                     case 1:
-                        String soundButton = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/KlickSound.wav";
+                        String soundButton = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/KlickSound.wav";
                         Media sound1 = new Media(new File(soundButton).toURI().toString());
                         MediaPlayer mediaPlayer1 = new MediaPlayer(sound1);
                         mediaPlayer1.play();
@@ -234,7 +248,7 @@ public class GUI extends GameApplication {
                         break;
 
                     case 2:
-                        String soundGameOver = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/dev/Snake/Sounds/SoundGameOver.wav";
+                        String soundGameOver = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/SoundGameOver.wav";
                         Media sound2 = new Media(new File(soundGameOver).toURI().toString());
                         MediaPlayer mediaPlayer2 = new MediaPlayer(sound2);
                         mediaPlayer2.play();
@@ -593,11 +607,21 @@ public class GUI extends GameApplication {
     }
 
     @Override
+    protected void initGameVars(Map<String, Object> vars) {
+        vars.put("score", 0);
+    }
+
+    @Override
+    protected void initUI() {
+        addText("Score: ", getAppWidth() - 120, getAppHeight() - 20);
+        addVarText("score", getAppWidth() - 50, getAppHeight() - 20);
+    }
+
+    @Override
     protected void initGame() {
         initBackgroundMusic();
         int screenWidth = 900;
         int screenHeight = 700;
-        int cellSize = 25;
         int gridWidth, gridHeight;
         gridHeight = switch (selectedSize) {
             case "Small" -> {
@@ -610,79 +634,42 @@ public class GUI extends GameApplication {
             }
             default -> {
                 gridWidth = 20;
-                yield 16;
+                yield 16; 
             }
         };
         GRID_SIZE_X = gridWidth;
         GRID_SIZE_Y = gridHeight;
-        CELL_SIZE = cellSize;
+        CELL_SIZE = (int) 800 / gridWidth;
 
 
-        int totalGridWidth = cellSize * gridWidth;
-        int totalGridHeight = cellSize * gridHeight;
+        getGameScene().setBackgroundColor(Color.GREEN);
 
-        // Snake-themed animated background
-        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 30, 0));
-        //FXGL.getGameScene().addUINode(bg);
+        Canvas canvas = new Canvas(GRID_SIZE_X * CELL_SIZE, GRID_SIZE_Y * CELL_SIZE); 
+        GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        // Add animated circles similar to the main menu
-        for (int i = 0; i < 12; i++) {
-            Circle snakeScale = new Circle(3 + Math.random() * 5, Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
-            snakeScale.setTranslateX(Math.random() * screenWidth);
-            snakeScale.setTranslateY(Math.random() * screenHeight);
-            //FXGL.getGameScene().addUINode(snakeScale);
-
-            Timeline timeline = new Timeline(
-                    new KeyFrame(Duration.seconds(2 + Math.random() * 3), e -> {
-                        snakeScale.setTranslateX(Math.random() * screenWidth);
-                        snakeScale.setTranslateY(Math.random() * screenHeight);
-                        snakeScale.setRadius(3 + Math.random() * 5);
-                        snakeScale.setFill(Color.rgb(
-                                50 + (int)(Math.random() * 50),
-                                100 + (int)(Math.random() * 100),
-                                50,
-                                0.7
-                        ));
-                    })
-            );
-            timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.play();
-        }
-
-        HBox gameContainer = new HBox(20);
-        gameContainer.setAlignment(Pos.CENTER);
-        gameContainer.setPadding(new Insets(20));
-
-        // Create snake-scale grid
-        VBox grid = new VBox(0);
-        grid.setAlignment(Pos.CENTER);
-
-        for (int i = 0; i < gridHeight; i++) {
-            HBox row = new HBox(0);
-            row.setAlignment(Pos.CENTER);
-            for (int j = 0; j < gridWidth; j++) {
-                Rectangle cell = new Rectangle(cellSize, cellSize);
-                if ((i + j) % 2 == 0) {
-                    cell.setFill(Color.rgb(144, 238, 144)); // Medium sea green
+        
+        for (int y = 0; y < GRID_SIZE_Y; y++) {
+            for (int x = 0; x < GRID_SIZE_X; x++){
+                if ((y + x) % 2 == 0){
+                    gc.setFill(Color.rgb(171, 214, 81));
                 } else {
-                    cell.setFill(Color.rgb(50, 205, 50)); // Sea green
+                    gc.setFill(Color.rgb(162, 208, 72));
                 }
-                cell.setStroke(Color.rgb(34, 139, 34, 0.4)); // Forest green light border
-                row.getChildren().add(cell);
+
+                gc.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
-            grid.getChildren().add(row);
         }
 
-        // Sidebar with snake theme
-        VBox sidebar = new VBox(20);
-        sidebar.setAlignment(Pos.TOP_CENTER);
-        sidebar.setPadding(new Insets(20));
-        sidebar.setStyle(
-                "-fx-background-color: rgba(0, 100, 0, 0.8);" + // Dark green with transparency
-                        "-fx-border-color: #3cb371;" + // Medium sea green border
-                        "-fx-border-width: 2px;"
-        );
-        sidebar.setPrefWidth(200);
+        Entity background = entityBuilder()
+            .at(0, 0)
+            .view(canvas)
+            .zIndex(-1)
+            .buildAndAttach();
+
+
+        snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X);
+
+        getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
 
         // Score text with snake theme
         scoreText = new Text("Score: 0");
@@ -723,47 +710,42 @@ public class GUI extends GameApplication {
         );
         skipTrackButton.setOnAction(e -> skipToNextTrack());
 
-        sidebar.getChildren().addAll(scoreText, endGameButton, skipTrackButton);
-        gameContainer.getChildren().addAll(grid, sidebar);
+        BorderPane controls = new BorderPane();
 
-        gameContainer.setTranslateX((screenWidth - (totalGridWidth + 240)) / 2);
-        gameContainer.setTranslateY((screenHeight - totalGridHeight) / 2);
-
-        //FXGL.getGameScene().addUINode(gameContainer);
-
-        // Player as a snake segment
-        player = FXGL.entityBuilder()
-                .at(gameContainer.getTranslateX() + (totalGridWidth / 2),
-                        gameContainer.getTranslateY() + (totalGridHeight / 2))
-                .view(new Rectangle(cellSize, cellSize, Color.rgb(34, 139, 34, 0.9))) // Forest green
-                .buildAndAttach();
+        HBox controlsContainer = new HBox(20);
+        controlsContainer.getChildren().addAll(skipTrackButton, endGameButton);
+        controlsContainer.setMaxHeight(50);
+        controlsContainer.setMinHeight(50);
+        controlsContainer.setPadding(new Insets(0, 0, 0, 20));
+        controls.setPrefHeight(getAppHeight());
+        controls.setPrefWidth(getAppWidth());
+        controls.setBottom(controlsContainer);
+        getGameScene().addUINode(controls);
     }
+
     @Override
     protected void initInput() {
         FXGL.onKey(upKey, () -> {
-            player.translateY(-5); 
-            game.set_direction(new Point2D(0, -1));
+            if (snake.getDirection() != Direction.DOWN) snake.updateDirection(Direction.UP);
         });
         FXGL.onKey(downKey, () -> {
-            player.translateY(5);
-            game.set_direction(new Point2D(0, 1));
+            if (snake.getDirection() != Direction.UP) snake.updateDirection(Direction.DOWN);
         });
         FXGL.onKey(leftKey, () -> {
-            player.translateX(-5);
-            game.set_direction(new Point2D(-1, 0));
+            if (snake.getDirection() != Direction.RIGHT) snake.updateDirection(Direction.LEFT);
         });
         FXGL.onKey(rightKey, () -> {
-            player.translateX(5);
-            game.set_direction(new Point2D(1, 0));
+            if (snake.getDirection() != Direction.LEFT) snake.updateDirection(Direction.RIGHT);
         });
-        FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
-            game.set_direction(new Point2D(0, 0));
+        /*FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
+            snake.updateDirection(Direction.NONE);
             FXGL.getGameController().gotoMainMenu();
-        });
+        });*/
     }
 
-    public void start_gui(String[] args) {
-
+    public static void start_gui(String[] args) {
+        Controller controller = new Controller();
+        controller.FilesDownloader();
         launch(args);
     }
 
@@ -774,4 +756,6 @@ public class GUI extends GameApplication {
     public int get_cell_size(){
         return CELL_SIZE;
     }
+
+
 }
