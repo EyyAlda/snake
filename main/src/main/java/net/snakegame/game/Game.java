@@ -2,11 +2,13 @@ package net.snakegame.game;
 
 import static com.almasb.fxgl.dsl.FXGL.animationBuilder;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGL.inc;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 
 import javafx.geometry.Point2D;
@@ -34,7 +36,7 @@ public class Game {
         this.GRID_HEIGHT = grid_height;
         this.GRID_WIDTH = grid_width;
         this.CELL_SIZE = cell_size;
-        Entity head = createSnakeSegment(starting_x / CELL_SIZE, starting_y / CELL_SIZE, Color.GREEN);
+        Entity head = createSnakeSegment(starting_x / CELL_SIZE, starting_y / CELL_SIZE, Color.BLUEVIOLET);
         snakeBody.add(head);
         addSnakeSegment();
         addSnakeSegment();
@@ -45,7 +47,7 @@ public class Game {
     private Entity createSnakeSegment(int gridX, int gridY, Color color) {
         return entityBuilder()
                 .at(gridX * CELL_SIZE, gridY * CELL_SIZE)
-                .viewWithBBox(new Rectangle(CELL_SIZE - 1, CELL_SIZE - 1, color))
+                .viewWithBBox(new Rectangle(CELL_SIZE, CELL_SIZE, color))
                 .buildAndAttach();
     }
 
@@ -56,7 +58,7 @@ public class Game {
         double y = lastSegment.getY() / CELL_SIZE;
 
         // Create new segment at the same position (it will follow during movement)
-        Entity newSegment = createSnakeSegment((int)x, (int)y, Color.LIGHTGREEN);
+        Entity newSegment = createSnakeSegment((int)x, (int)y, Color.BLUE);
         snakeBody.add(newSegment);
     }
     
@@ -87,36 +89,10 @@ private void spawnFood() {
 
         food = entityBuilder()
                 .at(x * CELL_SIZE, y * CELL_SIZE)
-                .viewWithBBox(new Rectangle(CELL_SIZE - 1, CELL_SIZE - 1, Color.RED))
+                .viewWithBBox(new Rectangle(CELL_SIZE, CELL_SIZE, Color.RED))
                 .buildAndAttach();
     }
 
-//    public void addSnakeElement(/*Color color*/) {
-/*        int starting_x;
-        int starting_y;
-        Direction dir;
-        starting_x = snakeElements.get(length - 1).getPosX();
-        starting_y = snakeElements.get(length - 1).getPosY();
-        dir = snakeElements.get(length - 1).getDirection();
-        snakeElements.add(new SnakeElements(starting_x, starting_y, dir, Color.LIGHTGREEN, length, CELL_SIZE, this));
-        length++;
-        
-
-    }
-
-    public void addSnakeElement(int pos_x, int pos_y) {
-        int starting_x;
-        int starting_y;
-        Direction dir;
-        starting_x = snakeElements.get(length - 1).getPosX();
-        starting_y = snakeElements.get(length - 1).getPosY();
-        dir = snakeElements.get(length - 1).getDirection();
-        snakeElements.add(new SnakeElements(starting_x, starting_y, dir, Color.LIGHTGREEN, length, CELL_SIZE, this));
-        length++;
-        
-
-    }
-*/
 
     public void move() {
         // Update direction
@@ -172,7 +148,7 @@ private void spawnFood() {
                     if (newGridX == foodX && newGridY == foodY) {
                         addSnakeSegment();
                         spawnFood();
-                        //inc("score", +1);
+                        inc("score", +1);
                     }
                 }
             })
@@ -201,4 +177,8 @@ private void spawnFood() {
     public Direction getDirection() {
         return nextDirection;
     }
+
+    //private void gameOver() {
+    //    FXGL.getGameController().gotoGameMenu();
+    //}
 }

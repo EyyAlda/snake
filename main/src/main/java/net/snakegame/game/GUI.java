@@ -1,5 +1,11 @@
 package net.snakegame.game;
 
+import static com.almasb.fxgl.dsl.FXGL.addText;
+import static com.almasb.fxgl.dsl.FXGL.addVarText;
+import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
+import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
+import static com.almasb.fxgl.dsl.FXGL.getGameScene;
 import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
 
 /** Klasse mit den Daten für die Schlange auf dem Spielfeld
@@ -8,7 +14,10 @@ import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
  */
 import java.io.File;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.swing.Painter;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
@@ -25,12 +34,16 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -68,21 +81,15 @@ public class GUI extends GameApplication {
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
     private Game snake;
-    private Controller controller;
-    // Flag to track download state
-    private static AtomicBoolean resourcesReady = new AtomicBoolean(false);
-    private static AtomicBoolean downloadInProgress = new AtomicBoolean(false);
+    private boolean hasGameStarted = false;
 
 
-    public GUI(Controller pController){
-        this.controller = pController;
-    }
 
     public GUI(){}
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setWidth(900);
+        settings.setWidth(800);
         settings.setHeight(700);
         settings.setTitle("Snake Game");
         settings.setMainMenuEnabled(true);
@@ -90,11 +97,6 @@ public class GUI extends GameApplication {
         settings.setManualResizeEnabled(true);
         settings.setPreserveResizeRatio(true);
         settings.setSceneFactory(new CustomSceneFactory());
-        // Set a longer loading time to allow for potential downloads
-        
-        // Combined scene factory that handles both download and game scenes
-        controller = new Controller();
-
     }
 
     private static class CustomSceneFactory extends SceneFactory {
@@ -104,39 +106,7 @@ public class GUI extends GameApplication {
         }
     }
 
-/**
-     * Custom loading scene with progress bar for resource download
-     */
-    private static class ResourceLoadingScene extends LoadingScene {
-        private ProgressBar progressBar;
-        private Text statusText;
 
-        public ResourceLoadingScene() {
-            // Create the progress UI
-            progressBar = new ProgressBar();
-            progressBar.setWidth(400);
-            
-            statusText = new Text("Preparing to download resources...");
-            statusText.setFill(Color.WHITE);
-            
-            VBox vbox = new VBox(10);
-            vbox.getChildren().addAll(progressBar, statusText);
-            
-            // Center the progress UI
-            vbox.setTranslateX(FXGL.getAppWidth() / 2 - 200);
-            vbox.setTranslateY(FXGL.getAppHeight() / 2 - 50);
-            
-            getContentRoot().getChildren().add(vbox);
-        }
-
-        public void updateProgress(double progress) {
-            progressBar.setCurrentValue(progress);
-        }
-
-        public void updateStatus(String status) {
-            statusText.setText(status);
-        }
-    }
     private void initMenuMusic() {
         try {
             if (menuMusicPlayer != null) {
@@ -644,6 +614,17 @@ public class GUI extends GameApplication {
     }
 
     @Override
+    protected void initGameVars(Map<String, Object> vars) {
+        vars.put("score", 0);
+    }
+
+    @Override
+    protected void initUI() {
+        addText("Score: ", getAppWidth() - 120, getAppHeight() - 20);
+        addVarText("score", getAppWidth() - 50, getAppHeight() - 20);
+    }
+
+    @Override
     protected void initGame() {
         initBackgroundMusic();
         int screenWidth = 900;
@@ -660,83 +641,42 @@ public class GUI extends GameApplication {
             }
             default -> {
                 gridWidth = 20;
-                yield 16;
+                yield 16; 
             }
         };
         GRID_SIZE_X = gridWidth;
         GRID_SIZE_Y = gridHeight;
-        CELL_SIZE = (int) 400 / gridWidth;
+        CELL_SIZE = (int) 800 / gridWidth;
+
+
+        getGameScene().setBackgroundColor(Color.GREEN);
+
+        Canvas canvas = new Canvas(GRID_SIZE_X * CELL_SIZE, GRID_SIZE_Y * CELL_SIZE); 
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        
+        for (int y = 0; y < GRID_SIZE_Y; y++) {
+            for (int x = 0; x < GRID_SIZE_X; x++){
+                if ((y + x) % 2 == 0){
+                    gc.setFill(Color.rgb(171, 214, 81));
+                } else {
+                    gc.setFill(Color.rgb(162, 208, 72));
+                }
+
+                gc.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+
+        Entity background = entityBuilder()
+            .at(0, 0)
+            .view(canvas)
+            .zIndex(-1)
+            .buildAndAttach();
+
 
         snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X);
 
-        getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
-
-
-        int totalGridWidth = CELL_SIZE * gridWidth;
-        int totalGridHeight = CELL_SIZE * gridHeight;
-
-        // Snake-themed animated background
-        Rectangle bg = new Rectangle(screenWidth, screenHeight, Color.rgb(0, 30, 0));
-        //FXGL.getGameScene().addUINode(bg);
-
-        // Add animated circles similar to the main menu
-        for (int i = 0; i < 12; i++) {
-            Circle snakeScale = new Circle(3 + Math.random() * 5, Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
-            snakeScale.setTranslateX(Math.random() * screenWidth);
-            snakeScale.setTranslateY(Math.random() * screenHeight);
-            //FXGL.getGameScene().addUINode(snakeScale);
-
-            Timeline timeline = new Timeline(
-                    new KeyFrame(Duration.seconds(2 + Math.random() * 3), e -> {
-                        snakeScale.setTranslateX(Math.random() * screenWidth);
-                        snakeScale.setTranslateY(Math.random() * screenHeight);
-                        snakeScale.setRadius(3 + Math.random() * 5);
-                        snakeScale.setFill(Color.rgb(
-                                50 + (int)(Math.random() * 50),
-                                100 + (int)(Math.random() * 100),
-                                50,
-                                0.7
-                        ));
-                    })
-            );
-            timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.play();
-        }
-
-        HBox gameContainer = new HBox(20);
-        gameContainer.setAlignment(Pos.CENTER);
-        gameContainer.setPadding(new Insets(20));
-
-        // Create snake-scale grid
-        VBox grid = new VBox(0);
-        grid.setAlignment(Pos.CENTER);
-
-        for (int i = 0; i < gridHeight; i++) {
-            HBox row = new HBox(0);
-            row.setAlignment(Pos.CENTER);
-            for (int j = 0; j < gridWidth; j++) {
-                Rectangle cell = new Rectangle(CELL_SIZE, CELL_SIZE);
-                if ((i + j) % 2 == 0) {
-                    cell.setFill(Color.rgb(144, 238, 144)); // Medium sea green
-                } else {
-                    cell.setFill(Color.rgb(50, 205, 50)); // Sea green
-                }
-                cell.setStroke(Color.rgb(34, 139, 34, 0.4)); // Forest green light border
-                row.getChildren().add(cell);
-            }
-            grid.getChildren().add(row);
-        }
-
-        // Sidebar with snake theme
-        VBox sidebar = new VBox(20);
-        sidebar.setAlignment(Pos.TOP_CENTER);
-        sidebar.setPadding(new Insets(20));
-        sidebar.setStyle(
-                "-fx-background-color: rgba(0, 100, 0, 0.8);" + // Dark green with transparency
-                        "-fx-border-color: #3cb371;" + // Medium sea green border
-                        "-fx-border-width: 2px;"
-        );
-        sidebar.setPrefWidth(200);
+        if (hasGameStarted) getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
 
         // Score text with snake theme
         scoreText = new Text("Score: 0");
@@ -777,20 +717,17 @@ public class GUI extends GameApplication {
         );
         skipTrackButton.setOnAction(e -> skipToNextTrack());
 
-        sidebar.getChildren().addAll(scoreText, endGameButton, skipTrackButton);
-        gameContainer.getChildren().addAll(grid, sidebar);
+        BorderPane controls = new BorderPane();
 
-        gameContainer.setTranslateX((screenWidth - (totalGridWidth + 240)) / 2);
-        gameContainer.setTranslateY((screenHeight - totalGridHeight) / 2);
-
-        //FXGL.getGameScene().addUINode(gameContainer);
-
-        // Player as a snake segment
-        //player = FXGL.entityBuilder()
-        //        .at(gameContainer.getTranslateX() + (totalGridWidth / 2),
-        //                gameContainer.getTranslateY() + (totalGridHeight / 2))
-        //        .view(new Rectangle(CELL_SIZE, CELL_SIZE, Color.rgb(34, 139, 34, 0.9))) // Forest green
-        //        .buildAndAttach();
+        HBox controlsContainer = new HBox(20);
+        controlsContainer.getChildren().addAll(skipTrackButton, endGameButton);
+        controlsContainer.setMaxHeight(50);
+        controlsContainer.setMinHeight(50);
+        controlsContainer.setPadding(new Insets(0, 0, 0, 20));
+        controls.setPrefHeight(getAppHeight());
+        controls.setPrefWidth(getAppWidth());
+        controls.setBottom(controlsContainer);
+        getGameScene().addUINode(controls);
     }
 
     @Override

@@ -9,7 +9,6 @@ import javafx.scene.input.KeyCode;
 public class TestGUI extends GameApplication {
 
     Controller controller = null;
-    int[][] grid = new int[15][12];
     Game snake = null;
 
     @Override

@@ -34,13 +34,7 @@ public class Controller {
 
     public Controller(TestGUI gui){
         this.testGUI = gui;        
-    }
-
-    public void startGame(String[] args){
-        FilesDownloader();
-        gui = new GUI(this);
-        gui.start_gui(args);
-    }
+    } 
     
     public boolean checkFiles(){
         return downloader.checkFilesExist(expectedFiles);
