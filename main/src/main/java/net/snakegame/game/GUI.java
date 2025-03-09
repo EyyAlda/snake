@@ -15,26 +15,20 @@ import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
 import java.io.File;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.Painter;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.app.MenuItem;
 import com.almasb.fxgl.app.scene.FXGLMenu;
-import com.almasb.fxgl.app.scene.LoadingScene;
 import com.almasb.fxgl.app.scene.MenuType;
 import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.ui.ProgressBar;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -81,7 +75,6 @@ public class GUI extends GameApplication {
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
     private Game snake;
-    private boolean hasGameStarted = false;
 
 
 
@@ -676,7 +669,7 @@ public class GUI extends GameApplication {
 
         snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X);
 
-        if (hasGameStarted) getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
+        getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
 
         // Score text with snake theme
         scoreText = new Text("Score: 0");

@@ -109,7 +109,7 @@ private void spawnFood() {
 
         // Check boundaries - game over if hit wall
         if (newGridX < 0 || newGridX >= GRID_WIDTH || newGridY < 0 || newGridY >= GRID_HEIGHT) {
-            //gameOver();
+            gameOver();
             return;
         }
 
@@ -120,7 +120,7 @@ private void spawnFood() {
             int segY = (int)(segment.getY() / CELL_SIZE);
 
             if (segX == newGridX && segY == newGridY) {
-                //gameOver();
+                gameOver();
                 return;
             }
         }
@@ -178,7 +178,7 @@ private void spawnFood() {
         return nextDirection;
     }
 
-    //private void gameOver() {
-    //    FXGL.getGameController().gotoGameMenu();
-    //}
+    private void gameOver() {
+        FXGL.getGameController().gotoMainMenu();
+    }
 }
