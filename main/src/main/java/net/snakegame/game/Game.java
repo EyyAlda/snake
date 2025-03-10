@@ -31,8 +31,10 @@ public class Game {
     private final double MOVE_SPEED = 0.2;
     private Entity food;
     private Random random = new Random();
+    private GUI gui;
 
-    public Game(int starting_x, int starting_y, int cell_size, int grid_height, int grid_width){
+    public Game(int starting_x, int starting_y, int cell_size, int grid_height, int grid_width, GUI gui){
+        this.gui = gui;
         this.GRID_HEIGHT = grid_height;
         this.GRID_WIDTH = grid_width;
         this.CELL_SIZE = cell_size;
@@ -146,6 +148,7 @@ private void spawnFood() {
                     int foodY = (int)(food.getY() / CELL_SIZE);
                     
                     if (newGridX == foodX && newGridY == foodY) {
+                        gui.playSound(0);
                         addSnakeSegment();
                         spawnFood();
                         inc("score", +1);
@@ -179,6 +182,7 @@ private void spawnFood() {
     }
 
     private void gameOver() {
+        gui.playSound(2);
         FXGL.getGameController().gotoMainMenu();
     }
 }
