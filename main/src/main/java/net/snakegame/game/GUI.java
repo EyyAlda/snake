@@ -617,11 +617,13 @@ public class GUI extends GameApplication {
         addVarText("score", getAppWidth() - 50, getAppHeight() - 20);
     }
 
+    public void playSound(int sound) {
+        SnakeMainMenu.play_sound(sound);
+    }
+
     @Override
     protected void initGame() {
         initBackgroundMusic();
-        int screenWidth = 900;
-        int screenHeight = 700;
         int gridWidth, gridHeight;
         gridHeight = switch (selectedSize) {
             case "Small" -> {
@@ -667,7 +669,7 @@ public class GUI extends GameApplication {
             .buildAndAttach();
 
 
-        snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X);
+        snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
 
         getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
 

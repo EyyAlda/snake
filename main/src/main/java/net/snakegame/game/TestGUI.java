@@ -22,7 +22,7 @@ public class TestGUI extends GameApplication {
     protected void initGame(){
         controller = new Controller(this);
         //controller.FilesDownloader();
-        snake = new Game(5, 3, 20, 15, 15);        
+        snake = new Game(5, 3, 20, 15, 15, new GUI());        
         //snake.create_snake();
     }
 
