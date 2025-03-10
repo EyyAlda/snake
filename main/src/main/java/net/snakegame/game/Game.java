@@ -12,6 +12,8 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -38,6 +40,7 @@ public class Game {
         this.GRID_HEIGHT = grid_height;
         this.GRID_WIDTH = grid_width;
         this.CELL_SIZE = cell_size;
+        createBackground();
         Entity head = createSnakeSegment(starting_x / CELL_SIZE, starting_y / CELL_SIZE, Color.BLUEVIOLET);
         snakeBody.add(head);
         addSnakeSegment();
@@ -173,6 +176,32 @@ private void spawnFood() {
                 .buildAndPlay();
         }
     }
+
+    public void createBackground() {
+        Canvas canvas = new Canvas(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE); 
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+            for (int x = 0; x < GRID_WIDTH; x++){
+                if ((y + x) % 2 == 0){
+                    gc.setFill(Color.rgb(171, 214, 81));
+                } else {
+                    gc.setFill(Color.rgb(162, 208, 72));
+                }
+
+                gc.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+
+        Entity background = entityBuilder()
+            .at(0, 0)
+            .view(canvas)
+            .zIndex(-1)
+            .buildAndAttach();
+
+    }
+
     public void updateDirection(Direction dir){
         nextDirection = dir;
     }

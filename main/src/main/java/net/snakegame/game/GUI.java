@@ -2,7 +2,6 @@ package net.snakegame.game;
 
 import static com.almasb.fxgl.dsl.FXGL.addText;
 import static com.almasb.fxgl.dsl.FXGL.addVarText;
-import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
 import static com.almasb.fxgl.dsl.FXGL.getGameScene;
@@ -30,8 +29,6 @@ import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
@@ -646,28 +643,7 @@ public class GUI extends GameApplication {
 
         getGameScene().setBackgroundColor(Color.GREEN);
 
-        Canvas canvas = new Canvas(GRID_SIZE_X * CELL_SIZE, GRID_SIZE_Y * CELL_SIZE); 
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-
         
-        for (int y = 0; y < GRID_SIZE_Y; y++) {
-            for (int x = 0; x < GRID_SIZE_X; x++){
-                if ((y + x) % 2 == 0){
-                    gc.setFill(Color.rgb(171, 214, 81));
-                } else {
-                    gc.setFill(Color.rgb(162, 208, 72));
-                }
-
-                gc.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            }
-        }
-
-        Entity background = entityBuilder()
-            .at(0, 0)
-            .view(canvas)
-            .zIndex(-1)
-            .buildAndAttach();
-
 
         snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
 
