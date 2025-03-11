@@ -46,6 +46,23 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class GUI extends GameApplication {
+
+    private static enum MovementSpeed {
+        DEFAULT(0.2),
+        SLOW(0.3),
+        QUICK(0.1);
+
+        double speed;
+
+        MovementSpeed(double speed) {
+            this.speed = speed;
+        }
+
+        public double getSpeed() {
+            return speed;
+        }
+    }
+
     private Entity player;
     private Button endGameButton;
     private Button skipTrackButton;
@@ -72,6 +89,7 @@ public class GUI extends GameApplication {
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
     private Game snake;
+    private static MovementSpeed speed = MovementSpeed.DEFAULT;
 
 
 
@@ -95,6 +113,7 @@ public class GUI extends GameApplication {
             return new SnakeMainMenu();
         }
     }
+
 
 
     private void initMenuMusic() {
@@ -403,6 +422,17 @@ public class GUI extends GameApplication {
             speedSelector.setOnAction(e -> {
                 play_sound(1);
                 slectedSpeed = speedSelector.getValue();
+                switch(speedSelector.getValue()) {
+                    case "Fast":
+                        speed = MovementSpeed.QUICK;
+                        break;
+                    case "Medium":
+                        speed = MovementSpeed.DEFAULT;
+                        break;
+                    case "Slow":
+                        speed = MovementSpeed.SLOW;
+                        break;
+                }
             });
 
             Button btnControls = createSnakeButton("Controls");
@@ -647,7 +677,7 @@ public class GUI extends GameApplication {
 
         snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
 
-        getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
+        getGameTimer().runAtInterval(snake::move, Duration.seconds(speed.getSpeed()));
 
         // Score text with snake theme
         scoreText = new Text("Score: 0");
@@ -735,5 +765,8 @@ public class GUI extends GameApplication {
         return CELL_SIZE;
     }
 
+    public double getMovementSpeed() {
+        return speed.getSpeed();
+    }
 
 }

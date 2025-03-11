@@ -1,5 +1,11 @@
 package net.snakegame.game;
 
+/**Beinhaltet die Spiellogik
+ * @author Lennard Rütten
+ * zuletzt Bearbeitet: 10.03.25
+ *
+ */
+
 import static com.almasb.fxgl.dsl.FXGL.animationBuilder;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.inc;
@@ -20,6 +26,7 @@ import javafx.util.Duration;
 
 public class Game {
 
+
     Controller controller;
     //private List<SnakeElements> snakeElements = new ArrayList<SnakeElements>();
     private List<Entity> snakeBody = new ArrayList<>();
@@ -30,7 +37,7 @@ public class Game {
     private boolean isMoving = false;
     private final int GRID_HEIGHT;
     private final int GRID_WIDTH;
-    private final double MOVE_SPEED = 0.2;
+    private final double MOVE_SPEED;
     private Entity food;
     private Random random = new Random();
     private GUI gui;
@@ -40,6 +47,7 @@ public class Game {
         this.GRID_HEIGHT = grid_height;
         this.GRID_WIDTH = grid_width;
         this.CELL_SIZE = cell_size;
+        this.MOVE_SPEED = gui.getMovementSpeed();
         createBackground();
         Entity head = createSnakeSegment(starting_x / CELL_SIZE, starting_y / CELL_SIZE, Color.BLUEVIOLET);
         snakeBody.add(head);
