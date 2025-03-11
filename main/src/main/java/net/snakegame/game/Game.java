@@ -17,6 +17,7 @@ import java.util.Random;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 
+import com.sun.scenario.Settings;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -41,6 +42,7 @@ public class Game {
     private Entity food;
     private Random random = new Random();
     private GUI gui;
+    private boolean isPaused = false;
 
     public Game(int starting_x, int starting_y, int cell_size, int grid_height, int grid_width, GUI gui){
         this.gui = gui;
@@ -55,8 +57,8 @@ public class Game {
         addSnakeSegment();
         addSnakeSegment();
         spawnFood();
-
     }
+
     private Entity createSnakeSegment(int gridX, int gridY, Color color) {
         return entityBuilder()
                 .at(gridX * CELL_SIZE, gridY * CELL_SIZE)
@@ -74,8 +76,8 @@ public class Game {
         Entity newSegment = createSnakeSegment((int)x, (int)y, Color.BLUE);
         snakeBody.add(newSegment);
     }
-    
-private void spawnFood() {
+
+    private void spawnFood() {
         if (food != null) {
             food.removeFromWorld();
         }
@@ -106,8 +108,12 @@ private void spawnFood() {
                 .buildAndAttach();
     }
 
-
     public void move() {
+        // Wenn das Spiel pausiert ist, keine Bewegung ausführen
+        if (isPaused) {
+            return;
+        }
+
         // Update direction
         currentDirection = nextDirection;
         isMoving = true;
@@ -149,47 +155,47 @@ private void spawnFood() {
         double targetY = newGridY * CELL_SIZE;
 
         animationBuilder()
-            .duration(Duration.seconds(MOVE_SPEED * 0.95)) // Slightly less than move interval
-            .onFinished(() -> {
-                isMoving = false;
-                
-                // Check food collision after animation completes
-                if (food != null) {
-                    int foodX = (int)(food.getX() / CELL_SIZE);
-                    int foodY = (int)(food.getY() / CELL_SIZE);
-                    
-                    if (newGridX == foodX && newGridY == foodY) {
-                        gui.playSound(0);
-                        addSnakeSegment();
-                        spawnFood();
-                        inc("score", +1);
+                .duration(Duration.seconds(MOVE_SPEED * 0.95)) // Slightly less than move interval
+                .onFinished(() -> {
+                    isMoving = false;
+
+                    // Check food collision after animation completes
+                    if (food != null) {
+                        int foodX = (int)(food.getX() / CELL_SIZE);
+                        int foodY = (int)(food.getY() / CELL_SIZE);
+
+                        if (newGridX == foodX && newGridY == foodY) {
+                            gui.playSound(0);
+                            addSnakeSegment();
+                            spawnFood();
+                            inc("score", +1);
+                        }
                     }
-                }
-            })
-            .translate(head)
-            .from(new Point2D(currentX, currentY))
-            .to(new Point2D(targetX, targetY))
-            .buildAndPlay();
+                })
+                .translate(head)
+                .from(new Point2D(currentX, currentY))
+                .to(new Point2D(targetX, targetY))
+                .buildAndPlay();
 
         // Move body segments with animation (follow the leader)
         for (int i = 1; i < snakeBody.size(); i++) {
             Entity segment = snakeBody.get(i);
             Point2D prevPos = prevPositions.get(i - 1);
-            
+
             animationBuilder()
-                .duration(Duration.seconds(MOVE_SPEED * 0.95))
-                .translate(segment)
-                .from(new Point2D(segment.getX(), segment.getY()))
-                .to(prevPos)
-                .buildAndPlay();
+                    .duration(Duration.seconds(MOVE_SPEED * 0.95))
+                    .translate(segment)
+                    .from(new Point2D(segment.getX(), segment.getY()))
+                    .to(prevPos)
+                    .buildAndPlay();
         }
     }
 
     public void createBackground() {
-        Canvas canvas = new Canvas(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE); 
+        Canvas canvas = new Canvas(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        
+
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++){
                 if ((y + x) % 2 == 0){
@@ -203,15 +209,17 @@ private void spawnFood() {
         }
 
         Entity background = entityBuilder()
-            .at(0, 0)
-            .view(canvas)
-            .zIndex(-1)
-            .buildAndAttach();
-
+                .at(0, 0)
+                .view(canvas)
+                .zIndex(-1)
+                .buildAndAttach();
     }
 
     public void updateDirection(Direction dir){
-        nextDirection = dir;
+        // Ignoriere Richtungsänderungen, wenn das Spiel pausiert ist
+        if (!isPaused) {
+            nextDirection = dir;
+        }
     }
 
     public Direction getDirection() {
@@ -221,5 +229,20 @@ private void spawnFood() {
     private void gameOver() {
         gui.playSound(2);
         FXGL.getGameController().gotoMainMenu();
+    }
+
+    // Neue Methode zum Pausieren des Spiels
+    public void pauseGame() {
+        isPaused = true;
+    }
+
+    // Neue Methode zum Fortsetzen des Spiels
+    public void resumeGame() {
+        isPaused = false;
+    }
+
+    // Methode zum Prüfen, ob das Spiel pausiert ist
+    public boolean isPaused() {
+        return isPaused;
     }
 }

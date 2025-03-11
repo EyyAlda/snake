@@ -1,16 +1,5 @@
 package net.snakegame.game;
 
-import static com.almasb.fxgl.dsl.FXGL.addText;
-import static com.almasb.fxgl.dsl.FXGL.addVarText;
-import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
-import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
-import static com.almasb.fxgl.dsl.FXGL.getGameScene;
-import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
-
-/** Klasse mit den Daten für die Schlange auf dem Spielfeld
- * @author Nick Gegenheimer
- *
- */
 import java.io.File;
 import java.util.EnumSet;
 import java.util.Map;
@@ -44,6 +33,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+
+import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class GUI extends GameApplication {
 
@@ -90,6 +81,7 @@ public class GUI extends GameApplication {
     private static int CELL_SIZE;
     private Game snake;
     private static MovementSpeed speed = MovementSpeed.DEFAULT;
+    public boolean isPaused = false;
 
 
 
@@ -97,6 +89,7 @@ public class GUI extends GameApplication {
 
     @Override
     protected void initSettings(GameSettings settings) {
+        settings.setGameMenuEnabled(false);
         settings.setWidth(800);
         settings.setHeight(700);
         settings.setTitle("Snake Game");
@@ -220,6 +213,131 @@ public class GUI extends GameApplication {
             backgroundMusicPlayer.stop();
             backgroundMusicPlayer.dispose();
             backgroundMusicPlayer = null;
+        }
+    }
+
+    public void createPauseMenu() {
+        BorderPane pauseOverlay = new BorderPane();
+        pauseOverlay.setPrefWidth(getAppWidth());
+        pauseOverlay.setPrefHeight(getAppHeight());
+
+        // Halbdurchsichtiger Hintergrund
+        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
+        background.setFill(Color.rgb(0, 30, 0, 0.8));
+
+        VBox pauseBox = new VBox(15);
+        pauseBox.setAlignment(Pos.CENTER);
+        pauseBox.setMaxWidth(400);
+        pauseBox.setPadding(new Insets(30));
+
+        Text title = FXGL.getUIFactoryService().newText("PAUSE", Color.LIGHTGREEN, 48);
+        title.setEffect(new DropShadow(10, Color.BLACK));
+
+        Button btnResume = createPauseButton("Resume Game");
+        btnResume.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            hidePauseMenu();
+            snake.resumeGame();
+        });
+
+        Button btnOptions = createPauseButton("Options");
+        btnOptions.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            SnakeMainMenu optionsmenu = new SnakeMainMenu();
+            optionsmenu.showOptionsMenu();
+        });
+
+        Button btnMainMenu = createPauseButton("Main Menu");
+        btnMainMenu.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            hidePauseMenu();
+            stopAndDisposeMusic();
+            initMenuMusic();
+            FXGL.getGameController().gotoMainMenu();
+        });
+
+        Rectangle separator1 = createMenuSeparator();
+        Rectangle separator2 = createMenuSeparator();
+
+        pauseBox.getChildren().addAll(
+                title,
+                separator1,
+                btnResume,
+                btnOptions,
+                separator2,
+                btnMainMenu
+        );
+
+        pauseOverlay.setCenter(pauseBox);
+
+        // Speichere die Referenz für späteren Zugriff
+        this.pauseMenuOverlay = pauseOverlay;
+    }
+
+    // Hilfsmethode für die Separatoren
+    private Rectangle createMenuSeparator() {
+        Rectangle separator = new Rectangle(250, 2);
+        separator.setFill(Color.LIGHTGREEN);
+        separator.setOpacity(0.5);
+        return separator;
+    }
+
+    // Hilfsmethode für die Erstellung der Buttons mit Snake-Thema
+    private Button createPauseButton(String text) {
+        Button button = new Button(text);
+        button.setPrefWidth(300);
+
+        String normalStyle = "-fx-background-color: #004d00;" +
+                "-fx-text-fill: #90ee90;" +
+                "-fx-font-size: 18px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 15px;" +
+                "-fx-border-color: #2e8b57;" +
+                "-fx-border-width: 2px;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0.0, 0, 1);";
+
+        String hoverStyle = "-fx-background-color: #008000;" +
+                "-fx-text-fill: #e0ffff;" +
+                "-fx-font-size: 18px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 15px;" +
+                "-fx-border-color: #3cb371;" +
+                "-fx-border-width: 2px;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0.0, 0, 1);";
+
+        button.setStyle(normalStyle);
+        button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
+        button.setOnMouseExited(e -> button.setStyle(normalStyle));
+
+        return button;
+    }
+
+    // Füge diese Variable zur Klasse GUI hinzu
+    private BorderPane pauseMenuOverlay;
+
+    // Methode zum Anzeigen des Pausemenüs
+    public void showPauseMenu() {
+        isPaused = true;
+        if (pauseMenuOverlay == null) {
+            createPauseMenu();
+        }
+
+        // Pausiere das Spiel
+        snake.pauseGame();
+
+        // Füge das Pausemenü zur Szene hinzu
+        getGameScene().addUINode(pauseMenuOverlay);
+    }
+
+    // Methode zum Ausblenden des Pausemenüs
+    public void hidePauseMenu() {
+        isPaused = false;
+        if (pauseMenuOverlay != null) {
+            getGameScene().removeUINode(pauseMenuOverlay);
         }
     }
 
@@ -376,7 +494,7 @@ public class GUI extends GameApplication {
             btnSound.setText("Sound: " + (isSoundOn ? "ON" : "OFF"));
         }
 
-        private void showOptionsMenu() {
+        public void showOptionsMenu() {
             // Entferne das Hauptmenü
             getContentRoot().getChildren().remove(menuBox);
 
@@ -663,7 +781,7 @@ public class GUI extends GameApplication {
             }
             default -> {
                 gridWidth = 20;
-                yield 16; 
+                yield 16;
             }
         };
         GRID_SIZE_X = gridWidth;
@@ -673,7 +791,7 @@ public class GUI extends GameApplication {
 
         getGameScene().setBackgroundColor(Color.GREEN);
 
-        
+
 
         snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
 
@@ -745,10 +863,11 @@ public class GUI extends GameApplication {
         FXGL.onKey(rightKey, () -> {
             if (snake.getDirection() != Direction.LEFT) snake.updateDirection(Direction.RIGHT);
         });
-        /*FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
-            snake.updateDirection(Direction.NONE);
-            FXGL.getGameController().gotoMainMenu();
-        });*/
+        FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
+            if(!isPaused){
+                showPauseMenu();
+            }
+        });
     }
 
     public static void start_gui(String[] args) {
