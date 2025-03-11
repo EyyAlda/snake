@@ -1,5 +1,12 @@
 package net.snakegame.game;
 
+import static com.almasb.fxgl.dsl.FXGL.addText;
+import static com.almasb.fxgl.dsl.FXGL.addVarText;
+import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
+import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
+import static com.almasb.fxgl.dsl.FXGL.getGameScene;
+import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
+
 import java.io.File;
 import java.util.EnumSet;
 import java.util.Map;
@@ -23,7 +30,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -33,8 +43,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-
-import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class GUI extends GameApplication {
 
@@ -220,15 +228,13 @@ public class GUI extends GameApplication {
         BorderPane pauseOverlay = new BorderPane();
         pauseOverlay.setPrefWidth(getAppWidth());
         pauseOverlay.setPrefHeight(getAppHeight());
-
-        // Halbdurchsichtiger Hintergrund
-        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
-        background.setFill(Color.rgb(0, 30, 0, 0.8));
+        pauseOverlay.setBackground(new Background(new BackgroundFill(Color.rgb(0, 30, 0, 0.5), new CornerRadii(0.0), new Insets(0))));
 
         VBox pauseBox = new VBox(15);
         pauseBox.setAlignment(Pos.CENTER);
         pauseBox.setMaxWidth(400);
         pauseBox.setPadding(new Insets(30));
+        
 
         Text title = FXGL.getUIFactoryService().newText("PAUSE", Color.LIGHTGREEN, 48);
         title.setEffect(new DropShadow(10, Color.BLACK));
