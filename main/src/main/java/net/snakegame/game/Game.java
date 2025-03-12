@@ -1,5 +1,11 @@
 package net.snakegame.game;
 
+/**Beinhaltet die Spiellogik
+ * @author Lennard Rütten
+ * zuletzt Bearbeitet: 10.03.25
+ *
+ */
+
 import static com.almasb.fxgl.dsl.FXGL.animationBuilder;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.inc;
@@ -11,7 +17,6 @@ import java.util.Random;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 
-import com.sun.scenario.Settings;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -20,6 +25,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 public class Game {
+
 
     Controller controller;
     //private List<SnakeElements> snakeElements = new ArrayList<SnakeElements>();
@@ -31,7 +37,7 @@ public class Game {
     private boolean isMoving = false;
     private final int GRID_HEIGHT;
     private final int GRID_WIDTH;
-    private final double MOVE_SPEED = 0.2;
+    private final double MOVE_SPEED;
     private Entity food;
     private Random random = new Random();
     private GUI gui;
@@ -42,6 +48,7 @@ public class Game {
         this.GRID_HEIGHT = grid_height;
         this.GRID_WIDTH = grid_width;
         this.CELL_SIZE = cell_size;
+        this.MOVE_SPEED = gui.getMovementSpeed();
         createBackground();
         Entity head = createSnakeSegment(starting_x / CELL_SIZE, starting_y / CELL_SIZE, Color.BLUEVIOLET);
         snakeBody.add(head);
@@ -51,6 +58,10 @@ public class Game {
         spawnFood();
     }
 
+    /**Erstellt ein einzelnes Segment für die Schlange
+     * Wird im Konstruktor und in addSnakeElement() aufgerufen
+     * @author Lennard Rütten
+     */
     private Entity createSnakeSegment(int gridX, int gridY, Color color) {
         return entityBuilder()
                 .at(gridX * CELL_SIZE, gridY * CELL_SIZE)
@@ -58,6 +69,10 @@ public class Game {
                 .buildAndAttach();
     }
 
+    /**Managed das Erstellen von Snakeelementen
+     * Wird aufgerufen von der move() Funktion, wenn über ein Food-Element gefahren wurde
+     * @author Lennard Rütten
+     */
     private void addSnakeSegment() {
         // Get last segment position
         Entity lastSegment = snakeBody.get(snakeBody.size() - 1);
@@ -69,6 +84,11 @@ public class Game {
         snakeBody.add(newSegment);
     }
 
+
+    /**Erstellt ein Food-Element und plaziert es zufällig auf dem Spielfeld
+     * Wird aufgerufen in move() und im Konstruktor
+     *@author Lennard Rütten
+     */
     private void spawnFood() {
         if (food != null) {
             food.removeFromWorld();
@@ -77,7 +97,7 @@ public class Game {
         int x, y;
         boolean validPosition;
 
-        // Find position not occupied by snake
+        // Finde eine Position, die nicht von der Schlange belegt wurde
         do {
             x = random.nextInt(GRID_WIDTH);
             y = random.nextInt(GRID_HEIGHT);
@@ -94,19 +114,24 @@ public class Game {
             }
         } while (!validPosition);
 
+        // Erstelle das Element als Entity
         food = entityBuilder()
                 .at(x * CELL_SIZE, y * CELL_SIZE)
                 .viewWithBBox(new Rectangle(CELL_SIZE, CELL_SIZE, Color.RED))
                 .buildAndAttach();
     }
 
+    /**Bewegt die Schlange ein Feld weiter
+     * Wird durch den FXGL game timer aufgerufen (definiert in GUI.java -> initGame())
+     * @author Lennard Rütten
+     */
     public void move() {
         // Wenn das Spiel pausiert ist, keine Bewegung ausführen
         if (isPaused) {
             return;
         }
 
-        // Update direction
+        // Richtung aktualisieren
         currentDirection = nextDirection;
         isMoving = true;
 
@@ -114,17 +139,17 @@ public class Game {
         double currentX = head.getX();
         double currentY = head.getY();
 
-        // Calculate new head position
+        // Berechnung der neuen Position für den Snake-Head
         int newGridX = (int)(currentX / CELL_SIZE) + currentDirection.dx;
         int newGridY = (int)(currentY / CELL_SIZE) + currentDirection.dy;
 
-        // Check boundaries - game over if hit wall
+        // Überprüfung der Spielfeldgrenzen - Wenn außerhalb, gameOver()
         if (newGridX < 0 || newGridX >= GRID_WIDTH || newGridY < 0 || newGridY >= GRID_HEIGHT) {
             gameOver();
             return;
         }
 
-        // Check self-collision - game over if hit self
+        // Überprüfe, ob die Schlange sich selbst treffen würde - Wenn ja, gameOver()
         for (int i = 1; i < snakeBody.size(); i++) {
             Entity segment = snakeBody.get(i);
             int segX = (int)(segment.getX() / CELL_SIZE);
@@ -136,28 +161,29 @@ public class Game {
             }
         }
 
-        // Store previous positions for smooth following
+        // Speichere die vorherigen Positionen der Snake-Elemente
         List<Point2D> prevPositions = new ArrayList<>();
         for (Entity segment : snakeBody) {
             prevPositions.add(new Point2D(segment.getX(), segment.getY()));
         }
 
-        // Move head with animation
+        // Berechne die neuen Koordinaten für den Kopf
         double targetX = newGridX * CELL_SIZE;
         double targetY = newGridY * CELL_SIZE;
 
+        // Spiele die Bewegung als Animation ab
         animationBuilder()
-                .duration(Duration.seconds(MOVE_SPEED * 0.95)) // Slightly less than move interval
+                .duration(Duration.seconds(MOVE_SPEED * 0.95))
                 .onFinished(() -> {
                     isMoving = false;
 
-                    // Check food collision after animation completes
+                    // Überprüfe, ob ein Food-Element getroffen wurde
                     if (food != null) {
                         int foodX = (int)(food.getX() / CELL_SIZE);
                         int foodY = (int)(food.getY() / CELL_SIZE);
 
                         if (newGridX == foodX && newGridY == foodY) {
-                            gui.playSound(0);
+                            gui.playSound(0); // spiele Essens sound
                             addSnakeSegment();
                             spawnFood();
                             inc("score", +1);
@@ -169,7 +195,7 @@ public class Game {
                 .to(new Point2D(targetX, targetY))
                 .buildAndPlay();
 
-        // Move body segments with animation (follow the leader)
+        // Ziehe die restlichen Elemente hinterher
         for (int i = 1; i < snakeBody.size(); i++) {
             Entity segment = snakeBody.get(i);
             Point2D prevPos = prevPositions.get(i - 1);
@@ -183,11 +209,16 @@ public class Game {
         }
     }
 
+    /**Erstellt den Hintergrund
+     * @author Lennard Rütten
+     */
     public void createBackground() {
+        // Canvas beinhaltet den Hintergrund
         Canvas canvas = new Canvas(GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
 
+        // Erstelle ein Karomuster auf dem Canvas
         for (int y = 0; y < GRID_HEIGHT; y++) {
             for (int x = 0; x < GRID_WIDTH; x++){
                 if ((y + x) % 2 == 0){
@@ -200,6 +231,7 @@ public class Game {
             }
         }
 
+        // platziere den Hintergrund als Entity unterhalb der Spielelemente
         Entity background = entityBuilder()
                 .at(0, 0)
                 .view(canvas)
@@ -207,6 +239,10 @@ public class Game {
                 .buildAndAttach();
     }
 
+    /**Aktualisiert die Richtung des Kopfelements
+     * Aufgerufen in GUI -> initInput
+     * @author Lennard Rütten
+     */
     public void updateDirection(Direction dir){
         // Ignoriere Richtungsänderungen, wenn das Spiel pausiert ist
         if (!isPaused) {
@@ -214,10 +250,17 @@ public class Game {
         }
     }
 
+    /**Gibt die aktuelle Kopfbewegungsrichtung zurück
+     * Wird von GUI -> initInput verwendet -> Notwendig, um 180° Drehungen zu verhindern
+     * @author Lennard Rütten
+     */
     public Direction getDirection() {
         return nextDirection;
     }
 
+    /**Bricht das Spiel ab und zeigt das Hauptmenü
+     * @author Lennard Rütten, Nick Gegenheimer
+     */
     private void gameOver() {
         gui.playSound(2);
         gui.stopAndDisposeMusic();

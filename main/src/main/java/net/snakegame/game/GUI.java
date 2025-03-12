@@ -1,5 +1,12 @@
 package net.snakegame.game;
 
+import static com.almasb.fxgl.dsl.FXGL.addText;
+import static com.almasb.fxgl.dsl.FXGL.addVarText;
+import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
+import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
+import static com.almasb.fxgl.dsl.FXGL.getGameScene;
+import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
+
 import java.io.File;
 import java.util.EnumSet;
 import java.util.Map;
@@ -23,7 +30,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -34,9 +44,24 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import static com.almasb.fxgl.dsl.FXGL.*;
-
 public class GUI extends GameApplication {
+
+    private static enum MovementSpeed {
+        DEFAULT(0.2),
+        SLOW(0.3),
+        QUICK(0.1);
+
+        double speed;
+
+        MovementSpeed(double speed) {
+            this.speed = speed;
+        }
+
+        public double getSpeed() {
+            return speed;
+        }
+    }
+
     private Entity player;
     private Button endGameButton;
     private Button skipTrackButton;
@@ -63,6 +88,7 @@ public class GUI extends GameApplication {
     private static int GRID_SIZE_Y;
     private static int CELL_SIZE;
     private Game snake;
+    private static MovementSpeed speed = MovementSpeed.DEFAULT;
     public boolean isPaused = false;
     private BorderPane pauseMenuOverlay;
     private BorderPane pauseMenuOverlayOptions;
@@ -93,7 +119,8 @@ public class GUI extends GameApplication {
     }
 
 
-    public void initMenuMusic() {
+
+    private void initMenuMusic() {
         try {
             // Stoppe zuerst die Hintergrundmusik, wenn sie läuft
             stopAndDisposeMusic();
@@ -204,15 +231,13 @@ public class GUI extends GameApplication {
         BorderPane pauseOverlay = new BorderPane();
         pauseOverlay.setPrefWidth(getAppWidth());
         pauseOverlay.setPrefHeight(getAppHeight());
-
-        // Halbdurchsichtiger Hintergrund
-        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
-        background.setFill(Color.rgb(0, 30, 0, 0.8));
+        pauseOverlay.setBackground(new Background(new BackgroundFill(Color.rgb(0, 30, 0, 0.5), new CornerRadii(0.0), new Insets(0))));
 
         VBox pauseBox = new VBox(15);
         pauseBox.setAlignment(Pos.CENTER);
         pauseBox.setMaxWidth(400);
         pauseBox.setPadding(new Insets(30));
+        
 
         Text title = FXGL.getUIFactoryService().newText("PAUSE", Color.LIGHTGREEN, 48);
         title.setEffect(new DropShadow(10, Color.BLACK));
@@ -837,6 +862,17 @@ public class GUI extends GameApplication {
             speedSelector.setOnAction(e -> {
                 play_sound(1);
                 slectedSpeed = speedSelector.getValue();
+                switch(speedSelector.getValue()) {
+                    case "Fast":
+                        speed = MovementSpeed.QUICK;
+                        break;
+                    case "Medium":
+                        speed = MovementSpeed.DEFAULT;
+                        break;
+                    case "Slow":
+                        speed = MovementSpeed.SLOW;
+                        break;
+                }
             });
 
             Button btnControls = createSnakeButton("Controls");
@@ -1084,9 +1120,10 @@ public class GUI extends GameApplication {
         getGameScene().setBackgroundColor(Color.GREEN);
 
 
-        snake = new Game((int) (gridWidth / 3) * CELL_SIZE, (int) (gridHeight / 2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
 
-        getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
+        snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
+
+        getGameTimer().runAtInterval(snake::move, Duration.seconds(speed.getSpeed()));
 
         // Score text with snake theme
         scoreText = new Text("Score: 0");
@@ -1204,4 +1241,17 @@ public class GUI extends GameApplication {
         controller.FilesDownloader();
         launch(args);
     }
+
+    public int[] get_grid_size(){
+        return new int[] {GRID_SIZE_X, GRID_SIZE_Y};
+    }
+
+    public int get_cell_size(){
+        return CELL_SIZE;
+    }
+
+    public double getMovementSpeed() {
+        return speed.getSpeed();
+    }
+
 }
