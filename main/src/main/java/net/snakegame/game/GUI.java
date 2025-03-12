@@ -120,7 +120,7 @@ public class GUI extends GameApplication {
 
 
 
-    private void initMenuMusic() {
+    public void initMenuMusic() {
         try {
             // Stoppe zuerst die Hintergrundmusik, wenn sie läuft
             stopAndDisposeMusic();
@@ -617,8 +617,6 @@ public class GUI extends GameApplication {
 
     // Add this method to the GUI class
     private void refreshInputHandlers() {
-        // Clear all existing input handlers
-        getInput().clearAll();
 
         // Re-initialize the input handlers with the current key bindings
         FXGL.onKey(upKey, () -> {
@@ -1148,7 +1146,7 @@ public class GUI extends GameApplication {
         endGameButton.setOnAction(e -> {
             stopAndDisposeMusic();
             initMenuMusic();
-            getGameController().gotoMainMenu();
+        FXGL.getGameController().gotoMainMenu();
         });
 
         skipTrackButton = new Button("Skip Track");
