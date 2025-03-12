@@ -64,10 +64,13 @@ public class GUI extends GameApplication {
     private static int CELL_SIZE;
     private Game snake;
     public boolean isPaused = false;
+    private BorderPane pauseMenuOverlay;
+    private BorderPane pauseMenuOverlayOptions;
+    private BorderPane pauseMenuOverlayControls;
 
 
-
-    public GUI(){}
+    public GUI() {
+    }
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -90,15 +93,20 @@ public class GUI extends GameApplication {
     }
 
 
-    private void initMenuMusic() {
+    public void initMenuMusic() {
         try {
+            // Stoppe zuerst die Hintergrundmusik, wenn sie läuft
+            stopAndDisposeMusic();
+
             if (menuMusicPlayer != null) {
                 menuMusicPlayer.stop();
                 menuMusicPlayer.dispose();
+                menuMusicPlayer = null;
             }
+
             Media menuMusic = new Media(new File(MENU_MUSIC_TRACK).toURI().toString());
             menuMusicPlayer = new MediaPlayer(menuMusic);
-            menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Endlosschleife
+            menuMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
 
             if (isMusicOn) {
                 menuMusicPlayer.play();
@@ -119,16 +127,13 @@ public class GUI extends GameApplication {
     }
 
 
-    private void initBackgroundMusic() {
-
+    public void initBackgroundMusic() {
         try {
-            loadAndPlayTrack(currentTrackIndex);
+            // Stelle sicher, dass vorherige Musik gestoppt wird
+            stopAndDisposeMusic();
 
-            // Set up the end of media handler
-            backgroundMusicPlayer.setOnEndOfMedia(() -> {
-                currentTrackIndex = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
-                loadAndPlayTrack(currentTrackIndex);
-            });
+            // Lade den ersten Track
+            loadAndPlayTrack(currentTrackIndex);
 
             // Get the primary stage and add focus listener
             FXGL.getGameScene().getRoot().sceneProperty().addListener((observable, oldScene, newScene) -> {
@@ -145,14 +150,9 @@ public class GUI extends GameApplication {
                     });
                 }
             });
-
-            // Initial play if music is enabled
-            if (isMusicOn) {
-                backgroundMusicPlayer.play();
-            }
         } catch (Exception e) {
             System.out.println("Error loading background music: " + e.getMessage());
-            e.printStackTrace(); // Added for better error tracking
+            e.printStackTrace();
         }
     }
 
@@ -162,9 +162,10 @@ public class GUI extends GameApplication {
             if (backgroundMusicPlayer != null) {
                 backgroundMusicPlayer.stop();
                 backgroundMusicPlayer.dispose();
+                backgroundMusicPlayer = null;  // Wichtig: Referenz auf null setzen
             }
 
-            // Lade und starte den neuen Track
+            // Lade und starte den neuen Track nur, wenn Musik eingeschaltet ist
             Media backgroundMusic = new Media(new File(MUSIC_TRACKS[trackIndex]).toURI().toString());
             backgroundMusicPlayer = new MediaPlayer(backgroundMusic);
             backgroundMusicPlayer.setCycleCount(1); // Spiele jeden Track einmal
@@ -180,8 +181,10 @@ public class GUI extends GameApplication {
             }
         } catch (Exception e) {
             System.out.println("Error loading track " + trackIndex + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
     public void skipToNextTrack() {
         if (backgroundMusicPlayer != null) {
             currentTrackIndex = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
@@ -189,7 +192,7 @@ public class GUI extends GameApplication {
         }
     }
 
-    private void stopAndDisposeMusic() {
+    public void stopAndDisposeMusic() {
         if (backgroundMusicPlayer != null) {
             backgroundMusicPlayer.stop();
             backgroundMusicPlayer.dispose();
@@ -224,8 +227,7 @@ public class GUI extends GameApplication {
         Button btnOptions = createPauseButton("Options");
         btnOptions.setOnAction(e -> {
             SnakeMainMenu.play_sound(1);
-            SnakeMainMenu optionsmenu = new SnakeMainMenu();
-            optionsmenu.showOptionsMenu();
+            showPauseOptions();
         });
 
         Button btnMainMenu = createPauseButton("Main Menu");
@@ -253,6 +255,195 @@ public class GUI extends GameApplication {
 
         // Speichere die Referenz für späteren Zugriff
         this.pauseMenuOverlay = pauseOverlay;
+    }
+
+    private void createPauseOptions() {
+        SnakeMainMenu soundControl = new SnakeMainMenu();
+        BorderPane pauseOverlayOptions = new BorderPane();
+        pauseOverlayOptions.setPrefWidth(getAppWidth());
+        pauseOverlayOptions.setPrefHeight(getAppHeight());
+
+        // Halbdurchsichtiger Hintergrund
+        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
+        background.setFill(Color.rgb(0, 30, 0, 0.8));
+
+        VBox pauseBoxoptions = new VBox(15);
+        pauseBoxoptions.setAlignment(Pos.CENTER);
+        pauseBoxoptions.setMaxWidth(400);
+        pauseBoxoptions.setPadding(new Insets(30));
+
+        Text title = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 48);
+        title.setEffect(new DropShadow(10, Color.BLACK));
+
+        Button btnSound = createPauseButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
+        btnSound.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            soundControl.soundControl(btnSound);
+        });
+
+        Button btnMusic = createPauseButton("Music: " + (isMusicOn ? "ON" : "OFF"));
+        btnMusic.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            soundControl.musicControl(btnMusic);
+        });
+
+        Button btnControls = createPauseButton("Controls");
+        btnControls.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            showPauseControls();
+        });
+
+        Button btnBack = createPauseButton("Back");
+        btnBack.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            showPauseMenu();
+        });
+
+        Rectangle separator1 = createMenuSeparator();
+        Rectangle separator2 = createMenuSeparator();
+        Rectangle separator3 = createMenuSeparator();
+
+
+        pauseBoxoptions.getChildren().addAll(
+                title,
+                separator1,
+                btnMusic,
+                btnSound,
+                separator2,
+                btnControls,
+                separator3,
+                btnBack
+        );
+
+        pauseOverlayOptions.setCenter(pauseBoxoptions);
+
+        // Speichere die Referenz für späteren Zugriff
+        this.pauseMenuOverlayOptions = pauseOverlayOptions;
+    }
+
+    private void createPauseControls() {
+        BorderPane pauseOverlayControls = new BorderPane();
+        pauseOverlayControls.setPrefWidth(getAppWidth());
+        pauseOverlayControls.setPrefHeight(getAppHeight());
+
+        // Halbdurchsichtiger Hintergrund
+        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
+        background.setFill(Color.rgb(0, 30, 0, 0.8));
+
+        VBox pauseBoxControls = new VBox(15);
+        pauseBoxControls.setAlignment(Pos.CENTER);
+        pauseBoxControls.setMaxWidth(400);
+        pauseBoxControls.setPadding(new Insets(30));
+
+        Text title = FXGL.getUIFactoryService().newText("Controls", Color.LIGHTGREEN, 48);
+        title.setEffect(new DropShadow(10, Color.BLACK));
+
+        // GUI-Instanz abrufen
+        GUI mainInstance = this;
+
+        VBox controlsBox = new VBox(15);
+        controlsBox.setAlignment(Pos.CENTER);
+
+        // Controls erstellen
+        HBox upControl = createControlButton("Up", mainInstance.upKey, "up");
+        HBox downControl = createControlButton("Down", mainInstance.downKey, "down");
+        HBox leftControl = createControlButton("Left", mainInstance.leftKey, "left");
+        HBox rightControl = createControlButton("Right", mainInstance.rightKey, "right");
+
+        Button btnBack = createPauseButton("Back");
+        btnBack.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            showPauseOptions();
+        });
+
+        controlsBox.getChildren().addAll(
+                upControl,
+                downControl,
+                leftControl,
+                rightControl
+        );
+
+        Rectangle separator1 = createMenuSeparator();
+        Rectangle separator2 = createMenuSeparator();
+
+        pauseBoxControls.getChildren().addAll(
+                title,
+                separator1,
+                controlsBox,
+                separator2,
+                btnBack
+        );
+
+        pauseOverlayControls.setCenter(pauseBoxControls);
+
+        // Speichere die Referenz für späteren Zugriff
+        this.pauseMenuOverlayControls = pauseOverlayControls;
+    }
+
+    // Hilfsmethode zum Erstellen der Control-Buttons
+    private HBox createControlButton(String label, KeyCode currentKey, String controlType) {
+        HBox control = new HBox(10);
+        control.setAlignment(Pos.CENTER);
+
+        Text keyText = FXGL.getUIFactoryService().newText(label + ": " + currentKey.getName(), Color.WHITE, 18);
+        Button btnChange = new Button("Change");
+        btnChange.setStyle(
+                "-fx-background-color: #004d00;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-padding: 5px 10px;" +
+                        "-fx-border-color: #2e8b57;" +
+                        "-fx-border-width: 1px;"
+        );
+        btnChange.setUserData(controlType);
+
+        btnChange.setOnAction(e -> {
+            SnakeMainMenu.play_sound(1);
+            setWaitingForKeyInput(btnChange, keyText, label);
+        });
+
+        control.getChildren().addAll(keyText, btnChange);
+        return control;
+    }
+
+    // Hilfsvariablen für das Warten auf Tastendruck
+    private Node waitingForKey = null;
+    private Text waitingText = null;
+
+    // Methode zum Setzen des Wartezustands
+    private void setWaitingForKeyInput(Button button, Text text, String label) {
+        // Zurücksetzen des vorherigen Wartezustands
+        if (waitingForKey != null) {
+            waitingForKey.setStyle(
+                    "-fx-background-color: #004d00;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-font-size: 14px;" +
+                            "-fx-padding: 5px 10px;" +
+                            "-fx-border-color: #2e8b57;" +
+                            "-fx-border-width: 1px;"
+            );
+        }
+
+        waitingForKey = button;
+        waitingText = text;
+        button.setStyle(
+                "-fx-background-color: #008000;" +
+                        "-fx-text-fill: yellow;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-padding: 5px 10px;" +
+                        "-fx-border-color: yellow;" +
+                        "-fx-border-width: 2px;"
+        );
+        text.setText(label + ": Press any key...");
+
+        // Remove any existing handlers first
+        removeKeyPressHandlers();
+
+        // Then add a fresh handler
+        getGameScene().getRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleControlsKeyPress);
+
+        // Stelle sicher, dass die Szene den Fokus hat, um Tastatureingaben zu erhalten
+        getGameScene().getRoot().requestFocus();
     }
 
     // Hilfsmethode für die Separatoren
@@ -297,14 +488,16 @@ public class GUI extends GameApplication {
         return button;
     }
 
-    // Füge diese Variable zur Klasse GUI hinzu
-    private BorderPane pauseMenuOverlay;
 
-    // Methode zum Anzeigen des Pausemenüs
     public void showPauseMenu() {
         isPaused = true;
         if (pauseMenuOverlay == null) {
             createPauseMenu();
+        }
+
+        // Optionsmenü ausblenden
+        if (pauseMenuOverlayOptions != null) {
+            getGameScene().removeUINode(pauseMenuOverlayOptions);
         }
 
         // Pausiere das Spiel
@@ -314,12 +507,115 @@ public class GUI extends GameApplication {
         getGameScene().addUINode(pauseMenuOverlay);
     }
 
-    // Methode zum Ausblenden des Pausemenüs
-    public void hidePauseMenu() {
-        isPaused = false;
+    // Update the showPauseOptions() method:
+    public void showPauseOptions() {
+        if (pauseMenuOverlayOptions == null) {
+            createPauseOptions();
+        }
+
+        // Remove controls menu if visible
+        if (pauseMenuOverlayControls != null) {
+            getGameScene().removeUINode(pauseMenuOverlayControls);
+        }
+
+        // Hide pause menu without resuming the game
         if (pauseMenuOverlay != null) {
             getGameScene().removeUINode(pauseMenuOverlay);
         }
+
+        // Show options menu
+        getGameScene().addUINode(pauseMenuOverlayOptions);
+    }
+
+    public void showPauseControls() {
+        if (pauseMenuOverlayControls == null) {
+            createPauseControls();
+        }
+
+        // Optionsmenü ausblenden
+        if (pauseMenuOverlayOptions != null) {
+            getGameScene().removeUINode(pauseMenuOverlayOptions);
+        }
+
+        // Pausemenü ausblenden
+        if (pauseMenuOverlay != null) {
+            getGameScene().removeUINode(pauseMenuOverlay);
+        }
+
+        // Controlsmenü anzeigen
+        getGameScene().addUINode(pauseMenuOverlayControls);
+    }
+
+    private void removeKeyPressHandlers() {
+        // Remove any existing key handlers from the scene
+        getGameScene().getRoot().removeEventHandler(KeyEvent.KEY_PRESSED, this::handleControlsKeyPress);
+
+        // Also ensure any other handlers are properly removed
+        if (pauseMenuOverlayControls != null) {
+            Node node = pauseMenuOverlayControls.getCenter();
+            if (node instanceof VBox) {
+                VBox pauseBox = (VBox) node;
+                for (Node child : pauseBox.getChildren()) {
+                    if (child instanceof HBox) {
+                        HBox hbox = (HBox) child;
+                        for (Node item : hbox.getChildren()) {
+                            if (item instanceof Button) {
+                                Button button = (Button) item;
+                                button.setOnAction(null);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // In der hidePauseMenu()-Methode
+    public void hidePauseMenu() {
+        isPaused = false;
+
+        if (pauseMenuOverlay != null) {
+            getGameScene().removeUINode(pauseMenuOverlay);
+        }
+        if (pauseMenuOverlayOptions != null) {
+            getGameScene().removeUINode(pauseMenuOverlayOptions);
+        }
+        if (pauseMenuOverlayControls != null) {
+            getGameScene().removeUINode(pauseMenuOverlayControls);
+        }
+
+        // Reset waiting state
+        waitingForKey = null;
+        waitingText = null;
+
+    }
+
+    // Add this method to the GUI class
+    private void refreshInputHandlers() {
+        // Clear all existing input handlers
+        getInput().clearAll();
+
+        // Re-initialize the input handlers with the current key bindings
+        FXGL.onKey(upKey, () -> {
+            if (!isPaused && snake.getDirection() != Direction.DOWN) snake.updateDirection(Direction.UP);
+        });
+        FXGL.onKey(downKey, () -> {
+            if (!isPaused && snake.getDirection() != Direction.UP) snake.updateDirection(Direction.DOWN);
+        });
+        FXGL.onKey(leftKey, () -> {
+            if (!isPaused && snake.getDirection() != Direction.RIGHT) snake.updateDirection(Direction.LEFT);
+        });
+        FXGL.onKey(rightKey, () -> {
+            if (!isPaused && snake.getDirection() != Direction.LEFT) snake.updateDirection(Direction.RIGHT);
+        });
+        FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
+            if (!isPaused) {
+                showPauseMenu();
+            } else {
+                hidePauseMenu();
+                snake.resumeGame();
+            }
+        });
     }
 
     private static class SnakeMainMenu extends FXGLMenu {
@@ -339,17 +635,28 @@ public class GUI extends GameApplication {
             optionsBox = new VBox(15);
             optionsBox.setAlignment(Pos.CENTER);
 
+            // Clean up any existing handlers
+            getContentRoot().removeEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
+
             showMainMenu();
-            getContentRoot().setOnKeyPressed(this::handleKeyPress);
+            getContentRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
         }
 
+        private void cleanupKeyHandlers() {
+            // Remove key event handlers to prevent duplicates
+            getContentRoot().removeEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
 
-        public static void play_sound(int soundId){
-            if(isSoundOn){
-                switch (soundId){
+            // Reset waiting state
+            waitingForKey = null;
+            waitingText = null;
+        }
+
+        public static void play_sound(int soundId) {
+            if (isSoundOn) {
+                switch (soundId) {
                     case 0:
                         String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/eating.wav";
-                        Media sound0 = new Media(new File (soundEating).toURI().toString());
+                        Media sound0 = new Media(new File(soundEating).toURI().toString());
                         MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
                         mediaPlayer0.play();
                         break;
@@ -394,11 +701,17 @@ public class GUI extends GameApplication {
                 waitingForKey.setStyle(createNormalControlStyle());
                 waitingForKey = null;
                 waitingText = null;
+
+                // Wichtig: Informiere die Hauptklasse über die Änderungen
+                mainInstance.refreshInputHandlers();
+
                 event.consume();
             }
         }
 
         private void showMainMenu() {
+            cleanupKeyHandlers();
+
             menuBox.getChildren().clear();
 
             // Entferne optionsBox falls vorhanden
@@ -445,6 +758,9 @@ public class GUI extends GameApplication {
             if (!getContentRoot().getChildren().contains(menuBox)) {
                 getContentRoot().getChildren().add(menuBox);
             }
+
+            getContentRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
+
         }
 
         private void musicControl(Button btnMusic) {
@@ -620,6 +936,9 @@ public class GUI extends GameApplication {
             btnChange.setUserData(controlType);
 
             btnChange.setOnAction(e -> {
+                // Clean up any previous handlers first
+                cleanupKeyHandlers();
+
                 if (waitingForKey != null) {
                     waitingForKey.setStyle(createNormalControlStyle());
                 }
@@ -627,6 +946,9 @@ public class GUI extends GameApplication {
                 waitingText = keyText;
                 btnChange.setStyle(createWaitingControlStyle());
                 keyText.setText(label + ": Press any key...");
+
+                // Re-add the handler
+                getContentRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
             });
 
             control.getChildren().addAll(keyText, btnChange);
@@ -697,7 +1019,7 @@ public class GUI extends GameApplication {
 
             for (int i = 0; i < 12; i++) {
                 Circle snakeScale = new Circle(3 + Math.random() * 5,
-                        Color.rgb(50 + (int)(Math.random() * 50), 100 + (int)(Math.random() * 100), 50, 0.7));
+                        Color.rgb(50 + (int) (Math.random() * 50), 100 + (int) (Math.random() * 100), 50, 0.7));
                 snakeScale.setTranslateX(Math.random() * getAppWidth());
                 snakeScale.setTranslateY(Math.random() * getAppHeight());
                 getContentRoot().getChildren().add(snakeScale);
@@ -708,8 +1030,8 @@ public class GUI extends GameApplication {
                             snakeScale.setTranslateY(Math.random() * getAppHeight());
                             snakeScale.setRadius(3 + Math.random() * 5);
                             snakeScale.setFill(Color.rgb(
-                                    50 + (int)(Math.random() * 50),
-                                    100 + (int)(Math.random() * 100),
+                                    50 + (int) (Math.random() * 50),
+                                    100 + (int) (Math.random() * 100),
                                     50,
                                     0.7
                             ));
@@ -762,8 +1084,7 @@ public class GUI extends GameApplication {
         getGameScene().setBackgroundColor(Color.GREEN);
 
 
-
-        snake = new Game((int) (gridWidth/3) * CELL_SIZE, (int) (gridHeight/2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
+        snake = new Game((int) (gridWidth / 3) * CELL_SIZE, (int) (gridHeight / 2) * CELL_SIZE, CELL_SIZE, GRID_SIZE_Y, GRID_SIZE_X, this);
 
         getGameTimer().runAtInterval(snake::move, Duration.seconds(0.2));
 
@@ -790,7 +1111,7 @@ public class GUI extends GameApplication {
         endGameButton.setOnAction(e -> {
             stopAndDisposeMusic();
             initMenuMusic();
-            FXGL.getGameController().gotoMainMenu();
+            getGameController().gotoMainMenu();
         });
 
         skipTrackButton = new Button("Skip Track");
@@ -817,6 +1138,44 @@ public class GUI extends GameApplication {
         controls.setPrefWidth(getAppWidth());
         controls.setBottom(controlsContainer);
         getGameScene().addUINode(controls);
+        getGameScene().getRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleControlsKeyPress);
+
+    }
+
+    private void handleControlsKeyPress(KeyEvent event) {
+        if (waitingForKey != null && waitingText != null && isPaused) {
+            KeyCode pressedKey = event.getCode();
+
+            if (waitingForKey.getUserData().equals("up")) {
+                upKey = pressedKey;
+                waitingText.setText("Up: " + pressedKey.getName());
+            } else if (waitingForKey.getUserData().equals("down")) {
+                downKey = pressedKey;
+                waitingText.setText("Down: " + pressedKey.getName());
+            } else if (waitingForKey.getUserData().equals("left")) {
+                leftKey = pressedKey;
+                waitingText.setText("Left: " + pressedKey.getName());
+            } else if (waitingForKey.getUserData().equals("right")) {
+                rightKey = pressedKey;
+                waitingText.setText("Right: " + pressedKey.getName());
+            }
+
+            waitingForKey.setStyle(
+                    "-fx-background-color: #004d00;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-font-size: 14px;" +
+                            "-fx-padding: 5px 10px;" +
+                            "-fx-border-color: #2e8b57;" +
+                            "-fx-border-width: 1px;"
+            );
+            waitingForKey = null;
+            waitingText = null;
+
+            // Refresh the input handlers with the new key bindings
+            refreshInputHandlers();
+
+            event.consume();
+        }
     }
 
     @Override
@@ -834,7 +1193,7 @@ public class GUI extends GameApplication {
             if (snake.getDirection() != Direction.LEFT) snake.updateDirection(Direction.RIGHT);
         });
         FXGL.onKeyDown(KeyCode.ESCAPE, () -> {
-            if(!isPaused){
+            if (!isPaused) {
                 showPauseMenu();
             }
         });
@@ -845,14 +1204,4 @@ public class GUI extends GameApplication {
         controller.FilesDownloader();
         launch(args);
     }
-
-    public int[] get_grid_size(){
-        return new int[] {GRID_SIZE_X, GRID_SIZE_Y};
-    }
-
-    public int get_cell_size(){
-        return CELL_SIZE;
-    }
-
-
 }
