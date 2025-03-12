@@ -263,6 +263,8 @@ public class Game {
      */
     private void gameOver() {
         gui.playSound(2);
+        gui.stopAndDisposeMusic();
+        gui.initMenuMusic();
         FXGL.getGameController().gotoMainMenu();
     }
 

@@ -10,7 +10,6 @@ public class TestGUI extends GameApplication {
 
     Controller controller = null;
     Game snake = null;
-
     @Override
     protected void initSettings(GameSettings settings){
         settings.setWidth(900);
