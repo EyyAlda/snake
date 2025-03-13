@@ -287,10 +287,8 @@ public class GUI extends GameApplication {
         BorderPane pauseOverlayOptions = new BorderPane();
         pauseOverlayOptions.setPrefWidth(getAppWidth());
         pauseOverlayOptions.setPrefHeight(getAppHeight());
+        pauseOverlayOptions.setBackground(new Background(new BackgroundFill(Color.rgb(0, 30, 0, 0.5), new CornerRadii(0.0), new Insets(0))));
 
-        // Halbdurchsichtiger Hintergrund
-        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
-        background.setFill(Color.rgb(0, 30, 0, 0.8));
 
         VBox pauseBoxoptions = new VBox(15);
         pauseBoxoptions.setAlignment(Pos.CENTER);
@@ -350,10 +348,8 @@ public class GUI extends GameApplication {
         BorderPane pauseOverlayControls = new BorderPane();
         pauseOverlayControls.setPrefWidth(getAppWidth());
         pauseOverlayControls.setPrefHeight(getAppHeight());
+        pauseOverlayControls.setBackground(new Background(new BackgroundFill(Color.rgb(0, 30, 0, 0.5), new CornerRadii(0.0), new Insets(0))));
 
-        // Halbdurchsichtiger Hintergrund
-        Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
-        background.setFill(Color.rgb(0, 30, 0, 0.8));
 
         VBox pauseBoxControls = new VBox(15);
         pauseBoxControls.setAlignment(Pos.CENTER);
