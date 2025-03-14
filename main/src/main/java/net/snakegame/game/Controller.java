@@ -47,7 +47,7 @@ public class Controller {
     // Methode zum Herunterladen und Überprüfen von Sounddateien
     public void FilesDownloader() {
         try {
-
+          
             // Überprüfen, ob alle Dateien im Sound-Verzeichnis vorhanden sind
             if (downloader.checkFilesExist(expectedFiles)) {
                 System.out.println("Alle Dateien sind vorhanden, kein Download erforderlich.");
