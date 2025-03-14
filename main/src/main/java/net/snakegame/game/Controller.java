@@ -42,9 +42,6 @@ public class Controller {
 
     public void FilesDownloader() {
         try {
-
-            // Erwartete Dateien im Sounds-Verzeichnis
-
             // Überprüfen, ob alle Dateien vorhanden sind mit FilesManager Methode
             if (downloader.checkFilesExist(expectedFiles)) {
                 System.out.println("Alle Dateien sind vorhanden, kein Download erforderlich.");

@@ -746,8 +746,7 @@ public class GUI extends GameApplication {
             Button btnPlay = createSnakeButton("Start Game");
             btnPlay.setOnAction(e -> {
                 play_sound(1);
-                GUI mainInstance2 = (GUI) FXGL.getApp();
-                mainInstance2.stopMenuMusic(); // Stoppe Menümusik vor Spielstart
+                mainInstance.stopMenuMusic(); // Stoppe Menümusik vor Spielstart
                 fireNewGame();
             });
 
