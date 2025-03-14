@@ -1,5 +1,12 @@
 package net.snakegame.game;
 
+/**
+ * Beinhaltet die Nutzeroberfläche
+ * @author Nick Gegenhimer
+ * zuletzt Bearbeitet: 11.03.25
+ *
+ */
+
 import static com.almasb.fxgl.dsl.FXGL.addText;
 import static com.almasb.fxgl.dsl.FXGL.addVarText;
 import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
@@ -46,6 +53,10 @@ import javafx.util.Duration;
 
 public class GUI extends GameApplication {
 
+    /**
+     * Enum für die Bewegungsgeschwindigkeit des Spiels
+     * Definiert verschiedene Geschwindigkeitsstufen für die Schlange
+     */
     private static enum MovementSpeed {
         DEFAULT(0.2),
         SLOW(0.3),
@@ -98,6 +109,10 @@ public class GUI extends GameApplication {
     public GUI() {
     }
 
+    /**
+     * Initialisiert die grundlegenden Einstellungen
+     * @author Nick Gegenheimer
+     */
     @Override
     protected void initSettings(GameSettings settings) {
         settings.setGameMenuEnabled(false);
@@ -111,6 +126,10 @@ public class GUI extends GameApplication {
         settings.setSceneFactory(new CustomSceneFactory());
     }
 
+    /**
+     * Custom Scene Factory für das Hauptmenü
+     * Erstellt ein spezielles Menü für das Snake-Spiel
+     */
     private static class CustomSceneFactory extends SceneFactory {
         @Override
         public FXGLMenu newMainMenu() {
@@ -119,7 +138,10 @@ public class GUI extends GameApplication {
     }
 
 
-
+    /**
+     * Initialisiert die Musik für das Hauptmenü
+     * Stoppt vorhandene Musik und startet die Menümusik
+     */
     public void initMenuMusic() {
         try {
             // Stoppe zuerst die Hintergrundmusik, wenn sie läuft
@@ -144,7 +166,10 @@ public class GUI extends GameApplication {
         }
     }
 
-    // Methode zum Stoppen der Menümusik:
+    /**
+     * Methode zum Stoppen der Menümusik
+     * Beendet die Wiedergabe und entfernt die Ressourcen
+     */
     private void stopMenuMusic() {
         if (menuMusicPlayer != null) {
             menuMusicPlayer.stop();
@@ -153,7 +178,10 @@ public class GUI extends GameApplication {
         }
     }
 
-
+    /**
+     * Initialisiert die Hintergrundmusik für das Spiel
+     * Lädt die Musik und fügt Listener für den Fensterfokus hinzu
+     */
     public void initBackgroundMusic() {
         try {
             // Stelle sicher, dass vorherige Musik gestoppt wird
@@ -183,6 +211,10 @@ public class GUI extends GameApplication {
         }
     }
 
+    /**
+     * Lädt und spielt einen bestimmten Musiktrack
+     * @param trackIndex Index des Tracks in der MUSIC_TRACKS-Liste
+     */
     private void loadAndPlayTrack(int trackIndex) {
         try {
             // Stoppe den aktuellen Player, falls vorhanden
@@ -212,6 +244,10 @@ public class GUI extends GameApplication {
         }
     }
 
+    /**
+     * Wechselt zum nächsten Musiktrack
+     * Wird vom Skip-Button aufgerufen
+     */
     public void skipToNextTrack() {
         if (backgroundMusicPlayer != null) {
             currentTrackIndex = (currentTrackIndex + 1) % MUSIC_TRACKS.length;
@@ -219,6 +255,10 @@ public class GUI extends GameApplication {
         }
     }
 
+    /**
+     * Stoppt und entfernt die aktuelle Hintergrundmusik
+     * Wichtig für das Ressourcenmanagement
+     */
     public void stopAndDisposeMusic() {
         if (backgroundMusicPlayer != null) {
             backgroundMusicPlayer.stop();
@@ -227,6 +267,10 @@ public class GUI extends GameApplication {
         }
     }
 
+    /**
+     * Erstellt das Pause-Menü für das Spiel
+     * Enthält Buttons zum Fortsetzen, für Optionen und zum Hauptmenü
+     */
     public void createPauseMenu() {
         BorderPane pauseOverlay = new BorderPane();
         pauseOverlay.setPrefWidth(getAppWidth());
@@ -237,7 +281,7 @@ public class GUI extends GameApplication {
         pauseBox.setAlignment(Pos.CENTER);
         pauseBox.setMaxWidth(400);
         pauseBox.setPadding(new Insets(30));
-        
+
 
         Text title = FXGL.getUIFactoryService().newText("PAUSE", Color.LIGHTGREEN, 48);
         title.setEffect(new DropShadow(10, Color.BLACK));
@@ -282,6 +326,10 @@ public class GUI extends GameApplication {
         this.pauseMenuOverlay = pauseOverlay;
     }
 
+    /**
+     * Erstellt das Options-Menü während der Spielpause
+     * Enthält Einstellungen für Sound, Musik und Steuerung
+     */
     private void createPauseOptions() {
         SnakeMainMenu soundControl = new SnakeMainMenu();
         BorderPane pauseOverlayOptions = new BorderPane();
@@ -346,41 +394,49 @@ public class GUI extends GameApplication {
         this.pauseMenuOverlayOptions = pauseOverlayOptions;
     }
 
+    /**
+     * Erstellt die Steuerelemente für das Pausemenü zur Anpassung der Steuerungstasten
+     */
     private void createPauseControls() {
         BorderPane pauseOverlayControls = new BorderPane();
         pauseOverlayControls.setPrefWidth(getAppWidth());
         pauseOverlayControls.setPrefHeight(getAppHeight());
 
-        // Halbdurchsichtiger Hintergrund
+        // Halbdurchsichtiger Hintergrund für bessere Lesbarkeit
         Rectangle background = new Rectangle(getAppWidth(), getAppHeight());
         background.setFill(Color.rgb(0, 30, 0, 0.8));
 
+        // Container für alle Steuerelemente
         VBox pauseBoxControls = new VBox(15);
         pauseBoxControls.setAlignment(Pos.CENTER);
         pauseBoxControls.setMaxWidth(400);
         pauseBoxControls.setPadding(new Insets(30));
 
+        // Titel des Controlsmenüs
         Text title = FXGL.getUIFactoryService().newText("Controls", Color.LIGHTGREEN, 48);
         title.setEffect(new DropShadow(10, Color.BLACK));
 
-        // GUI-Instanz abrufen
+        // GUI-Instanz abrufen für Zugriff auf die aktuellen Tastenbelegungen
         GUI mainInstance = this;
 
+        // Container für die einzelnen Steuerungsoptionen
         VBox controlsBox = new VBox(15);
         controlsBox.setAlignment(Pos.CENTER);
 
-        // Controls erstellen
+        // Erstellt die Steuerungsbuttons für alle Richtungen mit aktuellen Tastenbelegungen
         HBox upControl = createControlButton("Up", mainInstance.upKey, "up");
         HBox downControl = createControlButton("Down", mainInstance.downKey, "down");
         HBox leftControl = createControlButton("Left", mainInstance.leftKey, "left");
         HBox rightControl = createControlButton("Right", mainInstance.rightKey, "right");
 
+        // Zurück-Button zum Pausenmenü
         Button btnBack = createPauseButton("Back");
         btnBack.setOnAction(e -> {
-            SnakeMainMenu.play_sound(1);
-            showPauseOptions();
+            SnakeMainMenu.play_sound(1);  // Sound beim Klick abspielen
+            showPauseOptions();  // Zurück zu den Pausenoptionen
         });
 
+        // Fügt alle Steuerungselemente zum Container hinzu
         controlsBox.getChildren().addAll(
                 upControl,
                 downControl,
@@ -388,9 +444,11 @@ public class GUI extends GameApplication {
                 rightControl
         );
 
+        // Dekorative Trennlinien für bessere visuelle Struktur
         Rectangle separator1 = createMenuSeparator();
         Rectangle separator2 = createMenuSeparator();
 
+        // Alle Elemente zum Hauptcontainer hinzufügen
         pauseBoxControls.getChildren().addAll(
                 title,
                 separator1,
@@ -399,18 +457,28 @@ public class GUI extends GameApplication {
                 btnBack
         );
 
+        // Positioniert den Container in der Mitte des Bildschirms
         pauseOverlayControls.setCenter(pauseBoxControls);
 
-        // Speichere die Referenz für späteren Zugriff
+        // Speichert die Referenz für späteren Zugriff und Anzeige
         this.pauseMenuOverlayControls = pauseOverlayControls;
     }
 
-    // Hilfsmethode zum Erstellen der Control-Buttons
+    /**
+     * Hilfsmethode zum Erstellen der Steuerungsbuttons mit Beschriftung und Änderungsfunktion
+     * @param label Bezeichnung der Steuerung (z.B. "Up")
+     * @param currentKey Aktuell zugewiesene Taste
+     * @param controlType Typ der Steuerung für die Identifizierung (z.B. "up")
+     * @return HBox mit Beschriftung und Änderungsbutton
+     */
     private HBox createControlButton(String label, KeyCode currentKey, String controlType) {
         HBox control = new HBox(10);
         control.setAlignment(Pos.CENTER);
 
+        // Text mit aktueller Tastenbelegung
         Text keyText = FXGL.getUIFactoryService().newText(label + ": " + currentKey.getName(), Color.WHITE, 18);
+
+        // Button zum Ändern der Tastenbelegung
         Button btnChange = new Button("Change");
         btnChange.setStyle(
                 "-fx-background-color: #004d00;" +
@@ -420,24 +488,31 @@ public class GUI extends GameApplication {
                         "-fx-border-color: #2e8b57;" +
                         "-fx-border-width: 1px;"
         );
+        // Speichert den Steuerungstyp für spätere Zuordnung bei Tastendruck
         btnChange.setUserData(controlType);
 
+        // Event-Handler für den Änderungsbutton
         btnChange.setOnAction(e -> {
-            SnakeMainMenu.play_sound(1);
-            setWaitingForKeyInput(btnChange, keyText, label);
+            SnakeMainMenu.play_sound(1);  // Klicksound
+            setWaitingForKeyInput(btnChange, keyText, label);  // Wartemodus aktivieren
         });
 
         control.getChildren().addAll(keyText, btnChange);
         return control;
     }
 
-    // Hilfsvariablen für das Warten auf Tastendruck
-    private Node waitingForKey = null;
-    private Text waitingText = null;
+    // Hilfsvariablen für die Verfolgung des aktiven Änderungszustands
+    private Node waitingForKey = null;  // Aktiver Button, der auf Tasteneingabe wartet
+    private Text waitingText = null;    // Textfeld, das aktualisiert werden soll
 
-    // Methode zum Setzen des Wartezustands
+    /**
+     * Versetzt das Spiel in den Wartezustand für eine neue Tastenzuweisung
+     * @param button Der Button, der geklickt wurde
+     * @param text Das zugehörige Textfeld
+     * @param label Die Beschriftung der Steuerung
+     */
     private void setWaitingForKeyInput(Button button, Text text, String label) {
-        // Zurücksetzen des vorherigen Wartezustands
+        // Zurücksetzen des vorherigen Wartezustands, falls vorhanden
         if (waitingForKey != null) {
             waitingForKey.setStyle(
                     "-fx-background-color: #004d00;" +
@@ -449,8 +524,11 @@ public class GUI extends GameApplication {
             );
         }
 
+        // Neue Wartereferenzen setzen
         waitingForKey = button;
         waitingText = text;
+
+        // Visuelles Feedback - Button hervorheben
         button.setStyle(
                 "-fx-background-color: #008000;" +
                         "-fx-text-fill: yellow;" +
@@ -459,19 +537,23 @@ public class GUI extends GameApplication {
                         "-fx-border-color: yellow;" +
                         "-fx-border-width: 2px;"
         );
+        // Text ändern zur Benutzeranweisung
         text.setText(label + ": Press any key...");
 
-        // Remove any existing handlers first
+        // Bestehende Handler entfernen, um Konflikte zu vermeiden
         removeKeyPressHandlers();
 
-        // Then add a fresh handler
+        // Neuen Handler hinzufügen für den Tastendruck
         getGameScene().getRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleControlsKeyPress);
 
-        // Stelle sicher, dass die Szene den Fokus hat, um Tastatureingaben zu erhalten
+        // Sicherstellen, dass die Szene den Fokus hat, um Tastatureingaben zu erhalten
         getGameScene().getRoot().requestFocus();
     }
 
-    // Hilfsmethode für die Separatoren
+    /**
+     * Erstellt eine dekorative Trennlinie für die Menüs
+     * @return Rectangle als Trennlinie
+     */
     private Rectangle createMenuSeparator() {
         Rectangle separator = new Rectangle(250, 2);
         separator.setFill(Color.LIGHTGREEN);
@@ -479,11 +561,16 @@ public class GUI extends GameApplication {
         return separator;
     }
 
-    // Hilfsmethode für die Erstellung der Buttons mit Snake-Thema
+    /**
+     * Erstellt einen stilisierten Button im Snake-Thema für die Pausemenüs
+     * @param text Buttonbeschriftung
+     * @return Formatierter Button
+     */
     private Button createPauseButton(String text) {
         Button button = new Button(text);
         button.setPrefWidth(300);
 
+        // Normaler Zustand des Buttons
         String normalStyle = "-fx-background-color: #004d00;" +
                 "-fx-text-fill: #90ee90;" +
                 "-fx-font-size: 18px;" +
@@ -495,6 +582,7 @@ public class GUI extends GameApplication {
                 "-fx-background-radius: 10px;" +
                 "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0.0, 0, 1);";
 
+        // Hover-Effekt für den Button
         String hoverStyle = "-fx-background-color: #008000;" +
                 "-fx-text-fill: #e0ffff;" +
                 "-fx-font-size: 18px;" +
@@ -507,75 +595,84 @@ public class GUI extends GameApplication {
                 "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0.0, 0, 1);";
 
         button.setStyle(normalStyle);
+        // Event-Handler für Mausinteraktionen
         button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
         button.setOnMouseExited(e -> button.setStyle(normalStyle));
 
         return button;
     }
 
-
+    /**
+     * Zeigt das Hauptpausemenü an und pausiert das Spiel
+     */
     public void showPauseMenu() {
         isPaused = true;
         if (pauseMenuOverlay == null) {
-            createPauseMenu();
+            createPauseMenu();  // Lazy-Loading des Pausemenüs
         }
 
-        // Optionsmenü ausblenden
+        // Optionsmenü ausblenden falls angezeigt
         if (pauseMenuOverlayOptions != null) {
             getGameScene().removeUINode(pauseMenuOverlayOptions);
         }
 
-        // Pausiere das Spiel
+        // Pausiert das Spiel (Schlangenbewegung stoppen)
         snake.pauseGame();
 
-        // Füge das Pausemenü zur Szene hinzu
+        // Pausemenü zur Szene hinzufügen
         getGameScene().addUINode(pauseMenuOverlay);
     }
 
-    // Update the showPauseOptions() method:
+    /**
+     * Zeigt die Pauseoptionen an (Untermenü des Pausemenüs)
+     */
     public void showPauseOptions() {
         if (pauseMenuOverlayOptions == null) {
-            createPauseOptions();
+            createPauseOptions();  // Lazy-Loading der Pauseoptionen
         }
 
-        // Remove controls menu if visible
+        // Steuerungsmenü ausblenden falls angezeigt
         if (pauseMenuOverlayControls != null) {
             getGameScene().removeUINode(pauseMenuOverlayControls);
         }
 
-        // Hide pause menu without resuming the game
+        // Pausemenü ausblenden ohne das Spiel fortzusetzen
         if (pauseMenuOverlay != null) {
             getGameScene().removeUINode(pauseMenuOverlay);
         }
 
-        // Show options menu
+        // Optionsmenü anzeigen
         getGameScene().addUINode(pauseMenuOverlayOptions);
     }
 
+    /**
+     * Zeigt das Steuerungsmenü innerhalb des Pausezustands an
+     */
     public void showPauseControls() {
         if (pauseMenuOverlayControls == null) {
-            createPauseControls();
+            createPauseControls();  // Lazy-Loading des Steuerungsmenüs
         }
 
-        // Optionsmenü ausblenden
+        // Andere Menüs ausblenden
         if (pauseMenuOverlayOptions != null) {
             getGameScene().removeUINode(pauseMenuOverlayOptions);
         }
-
-        // Pausemenü ausblenden
         if (pauseMenuOverlay != null) {
             getGameScene().removeUINode(pauseMenuOverlay);
         }
 
-        // Controlsmenü anzeigen
+        // Steuerungsmenü anzeigen
         getGameScene().addUINode(pauseMenuOverlayControls);
     }
 
+    /**
+     * Entfernt alle Event-Handler für Tastaturereignisse, um Konflikte zu vermeiden
+     */
     private void removeKeyPressHandlers() {
-        // Remove any existing key handlers from the scene
+        // Entfernt bestehende Tastatur-Handler von der Szene
         getGameScene().getRoot().removeEventHandler(KeyEvent.KEY_PRESSED, this::handleControlsKeyPress);
 
-        // Also ensure any other handlers are properly removed
+        // Stellt sicher, dass alle anderen Handler ebenfalls entfernt werden
         if (pauseMenuOverlayControls != null) {
             Node node = pauseMenuOverlayControls.getCenter();
             if (node instanceof VBox) {
@@ -595,10 +692,13 @@ public class GUI extends GameApplication {
         }
     }
 
-    // In der hidePauseMenu()-Methode
+    /**
+     * Blendet alle Pausemenüs aus und setzt den Pausezustand zurück
+     */
     public void hidePauseMenu() {
         isPaused = false;
 
+        // Alle Pausemenüs entfernen
         if (pauseMenuOverlay != null) {
             getGameScene().removeUINode(pauseMenuOverlay);
         }
@@ -609,16 +709,17 @@ public class GUI extends GameApplication {
             getGameScene().removeUINode(pauseMenuOverlayControls);
         }
 
-        // Reset waiting state
+        // Wartemodus zurücksetzen
         waitingForKey = null;
         waitingText = null;
-
     }
 
-    // Add this method to the GUI class
+    /**
+     * Aktualisiert die Tastatureingabe-Handler mit den aktuellen Tastenbelegungen
+     * Wird nach Änderungen der Steuerung aufgerufen
+     */
     private void refreshInputHandlers() {
-
-        // Re-initialize the input handlers with the current key bindings
+        // Re-initialisiert die Eingabe-Handler mit den aktuellen Tastenbelegungen
         FXGL.onKey(upKey, () -> {
             if (!isPaused && snake.getDirection() != Direction.DOWN) snake.updateDirection(Direction.UP);
         });
@@ -642,49 +743,49 @@ public class GUI extends GameApplication {
     }
 
     private static class SnakeMainMenu extends FXGLMenu {
-        private VBox menuBox;
-        private VBox optionsBox;
-        private Node waitingForKey = null;
-        private Text waitingText = null;
+        private VBox menuBox;        // Container für das Hauptmenü
+        private VBox optionsBox;     // Container für das Optionsmenü
+        private Node waitingForKey = null;  // Speichert den Button, der auf eine Tastatureingabe wartet
+        private Text waitingText = null;    // Text, der während der Tastenzuweisung angezeigt wird
 
         public SnakeMainMenu() {
-            super(MenuType.MAIN_MENU);
-            createSnakeBackground();
+            super(MenuType.MAIN_MENU);  // Ruft den Konstruktor der übergeordneten Klasse auf und setzt den Menütyp
+            createSnakeBackground();    // Erstellt den thematischen Hintergrund für das Menü
 
-            // Separate boxes for main menu and options
-            menuBox = new VBox(15);
-            menuBox.setAlignment(Pos.CENTER);
+            // Separate Boxen für Hauptmenü und Optionsmenü
+            menuBox = new VBox(15);     // VBox mit 15px Abstand zwischen den Elementen
+            menuBox.setAlignment(Pos.CENTER);  // Zentriert die Elemente in der Box
 
-            optionsBox = new VBox(15);
-            optionsBox.setAlignment(Pos.CENTER);
+            optionsBox = new VBox(15);  // VBox für das Optionsmenü
+            optionsBox.setAlignment(Pos.CENTER);  // Zentriert die Elemente in der Box
 
-            // Clean up any existing handlers
+            // Bereinigt vorhandene Event-Handler, um Duplikate zu vermeiden
             getContentRoot().removeEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
 
-            showMainMenu();
-            getContentRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
+            showMainMenu();  // Zeigt das Hauptmenü an
+            getContentRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);  // Fügt den Tastatur-Event-Handler hinzu
         }
 
         private void cleanupKeyHandlers() {
-            // Remove key event handlers to prevent duplicates
+            // Entfernt Tastatur-Event-Handler, um Duplikate zu vermeiden
             getContentRoot().removeEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
 
-            // Reset waiting state
+            // Setzt den Wartezustand zurück
             waitingForKey = null;
             waitingText = null;
         }
 
         public static void play_sound(int soundId) {
-            if (isSoundOn) {
+            if (isSoundOn) {  // Prüft, ob Sound aktiviert ist
                 switch (soundId) {
-                    case 0:
+                    case 0:  // Essensgeräusch
                         String soundEating = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/eating.wav";
                         Media sound0 = new Media(new File(soundEating).toURI().toString());
                         MediaPlayer mediaPlayer0 = new MediaPlayer(sound0);
                         mediaPlayer0.play();
                         break;
 
-                    case 1:
+                    case 1:  // Tastendruck-Geräusch
                         String soundButton = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/KlickSound.wav";
                         Media sound1 = new Media(new File(soundButton).toURI().toString());
                         MediaPlayer mediaPlayer1 = new MediaPlayer(sound1);
@@ -692,7 +793,7 @@ public class GUI extends GameApplication {
                         mediaPlayer1.setVolume(1.0);
                         break;
 
-                    case 2:
+                    case 2:  // Game Over Geräusch
                         String soundGameOver = Files.getUserDir(Files.DirectoryType.DOCUMENTS) + "/myGames/Snake/Sounds/SoundGameOver.wav";
                         Media sound2 = new Media(new File(soundGameOver).toURI().toString());
                         MediaPlayer mediaPlayer2 = new MediaPlayer(sound2);
@@ -703,10 +804,11 @@ public class GUI extends GameApplication {
         }
 
         private void handleKeyPress(KeyEvent event) {
-            if (waitingForKey != null && waitingText != null) {
-                KeyCode pressedKey = event.getCode();
-                GUI mainInstance = (GUI) FXGL.getApp();
+            if (waitingForKey != null && waitingText != null) {  // Prüft, ob auf eine Tasteneingabe gewartet wird
+                KeyCode pressedKey = event.getCode();  // Speichert den Code der gedrückten Taste
+                GUI mainInstance = (GUI) FXGL.getApp();  // Holt die Hauptinstanz des Spiels
 
+                // Weist die gedrückte Taste der entsprechenden Steuerung zu
                 if (waitingForKey.getUserData().equals("up")) {
                     mainInstance.upKey = pressedKey;
                     waitingText.setText("Up: " + pressedKey.getName());
@@ -721,145 +823,158 @@ public class GUI extends GameApplication {
                     waitingText.setText("Right: " + pressedKey.getName());
                 }
 
+                // Setzt den Button-Stil zurück
                 waitingForKey.setStyle(createNormalControlStyle());
                 waitingForKey = null;
                 waitingText = null;
 
-                // Wichtig: Informiere die Hauptklasse über die Änderungen
+                // Wichtig: Informiert die Hauptklasse über die Änderungen
                 mainInstance.refreshInputHandlers();
 
-                event.consume();
+                event.consume();  // Verhindert, dass das Event weitergegeben wird
             }
         }
 
         private void showMainMenu() {
-            cleanupKeyHandlers();
+            cleanupKeyHandlers();  // Bereinigt alle Tastatur-Event-Handler
 
-            menuBox.getChildren().clear();
+            menuBox.getChildren().clear();  // Löscht alle vorhandenen Elemente aus der menüBox
 
-            // Entferne optionsBox falls vorhanden
+            // Entfernt optionsBox falls vorhanden
             getContentRoot().getChildren().remove(optionsBox);
 
-            // Starte Menümusik wenn das Hauptmenü angezeigt wird
+            // Startet Menümusik, wenn das Hauptmenü angezeigt wird
             GUI mainInstance = (GUI) FXGL.getApp();
             mainInstance.initMenuMusic();
 
+            // Erstellt den Titel des Spiels
             Text title = FXGL.getUIFactoryService().newText("SNAKE", Color.LIGHTGREEN, 72);
-            title.setEffect(new DropShadow(10, Color.BLACK));
+            title.setEffect(new DropShadow(10, Color.BLACK));  // Fügt einen Schatteneffekt hinzu
 
+            // Erstellt den Start-Spiel-Button
             Button btnPlay = createSnakeButton("Start Game");
             btnPlay.setOnAction(e -> {
-                play_sound(1);
+                play_sound(1);  // Spielt das Klick-Geräusch ab
                 GUI mainInstance2 = (GUI) FXGL.getApp();
-                mainInstance2.stopMenuMusic(); // Stoppe Menümusik vor Spielstart
-                fireNewGame();
+                mainInstance2.stopMenuMusic();  // Stoppt die Menümusik vor dem Spielstart
+                fireNewGame();  // Startet ein neues Spiel
             });
 
+            // Erstellt den Options-Button
             Button btnOptions = createSnakeButton("Options");
             btnOptions.setOnAction(e -> {
-                play_sound(1);
-                showOptionsMenu();
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                showOptionsMenu();  // Zeigt das Optionsmenü an
             });
 
+            // Erstellt den Spiel-Beenden-Button
             Button btnEndGame = createSnakeButton("End Game");
             btnEndGame.setOnAction(e -> {
-                play_sound(1);
-                FXGL.getGameController().exit();
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                FXGL.getGameController().exit();  // Beendet das Spiel
             });
 
+            // Fügt alle Elemente zur menuBox hinzu
             menuBox.getChildren().addAll(
                     title,
-                    createSeparator(),
+                    createSeparator(),  // Fügt einen Trennstrich ein
                     btnPlay,
                     btnOptions,
                     btnEndGame
             );
 
+            // Positioniert die menuBox in der Mitte des Bildschirms
             menuBox.setTranslateX(getAppWidth() / 2.0 - 150);
             menuBox.setTranslateY(getAppHeight() / 2.0 - 200);
 
+            // Fügt die menuBox zum Hauptcontainer hinzu, falls sie noch nicht vorhanden ist
             if (!getContentRoot().getChildren().contains(menuBox)) {
                 getContentRoot().getChildren().add(menuBox);
             }
 
+            // Fügt den Tastatur-Event-Handler hinzu
             getContentRoot().addEventHandler(KeyEvent.KEY_PRESSED, this::handleKeyPress);
-
         }
 
         private void musicControl(Button btnMusic) {
-            isMusicOn = !isMusicOn;
-            btnMusic.setText("Music: " + (isMusicOn ? "ON" : "OFF"));
+            isMusicOn = !isMusicOn;  // Wechselt den Musikstatus (an/aus)
+            btnMusic.setText("Music: " + (isMusicOn ? "ON" : "OFF"));  // Aktualisiert den Buttontext
 
             GUI mainInstance = (GUI) FXGL.getApp();
-            if (isMusicOn) {
+            if (isMusicOn) {  // Wenn Musik eingeschaltet wird
                 if (menuMusicPlayer != null) {
-                    menuMusicPlayer.play();
+                    menuMusicPlayer.play();  // Startet die Menümusik
                 }
                 if (backgroundMusicPlayer != null) {
-                    backgroundMusicPlayer.play();
+                    backgroundMusicPlayer.play();  // Startet die Hintergrundmusik
                 }
-            } else {
+            } else {  // Wenn Musik ausgeschaltet wird
                 if (menuMusicPlayer != null) {
-                    menuMusicPlayer.pause();
+                    menuMusicPlayer.pause();  // Pausiert die Menümusik
                 }
                 if (backgroundMusicPlayer != null) {
-                    backgroundMusicPlayer.pause();
+                    backgroundMusicPlayer.pause();  // Pausiert die Hintergrundmusik
                 }
             }
         }
 
-
         private void soundControl(Button btnSound) {
-            isSoundOn = !isSoundOn;
-            btnSound.setText("Sound: " + (isSoundOn ? "ON" : "OFF"));
+            isSoundOn = !isSoundOn;  // Wechselt den Soundstatus (an/aus)
+            btnSound.setText("Sound: " + (isSoundOn ? "ON" : "OFF"));  // Aktualisiert den Buttontext
         }
 
         public void showOptionsMenu() {
-            // Entferne das Hauptmenü
+            // Entfernt das Hauptmenü
             getContentRoot().getChildren().remove(menuBox);
 
-            optionsBox.getChildren().clear();
+            optionsBox.getChildren().clear();  // Löscht alle vorhandenen Elemente aus der optionsBox
 
+            // Erstellt Titel und Überschriften für das Optionsmenü
             Text optionsTitle = FXGL.getUIFactoryService().newText("Options", Color.LIGHTGREEN, 32);
             Text gameSizeTitel = FXGL.getUIFactoryService().newText("Size", Color.LIGHTGREEN, 26);
             Text speedGameTitel = FXGL.getUIFactoryService().newText("Speed", Color.LIGHTGREEN, 26);
 
+            // Erstellt den Sound-Button
             Button btnSound = createSnakeButton("Sound: " + (isSoundOn ? "ON" : "OFF"));
             btnSound.setOnAction(e -> {
-                play_sound(1);
-                soundControl(btnSound);
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                soundControl(btnSound);  // Wechselt den Soundstatus und aktualisiert den Button
             });
 
+            // Erstellt den Musik-Button
             Button btnMusic = createSnakeButton("Music: " + (isMusicOn ? "ON" : "OFF"));
             btnMusic.setOnAction(e -> {
-                play_sound(1);
-                musicControl(btnMusic);
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                musicControl(btnMusic);  // Wechselt den Musikstatus und aktualisiert den Button
             });
 
+            // Erstellt den Größen-Auswahlbereich
             ComboBox<String> sizeSelector = new ComboBox<>();
-            sizeSelector.getItems().addAll("Small", "Medium", "Large");
-            sizeSelector.setValue(selectedSize);
+            sizeSelector.getItems().addAll("Small", "Medium", "Large");  // Fügt die Größenoptionen hinzu
+            sizeSelector.setValue(selectedSize);  // Setzt die aktuelle Größe
             sizeSelector.setStyle(
                     "-fx-background-color: #004d00;" +
                             "-fx-color: white;" +
                             "-fx-font-size: 14px;"
             );
             sizeSelector.setOnAction(e -> {
-                play_sound(1);
-                selectedSize = sizeSelector.getValue();
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                selectedSize = sizeSelector.getValue();  // Speichert die ausgewählte Größe
             });
 
+            // Erstellt den Geschwindigkeits-Auswahlbereich
             ComboBox<String> speedSelector = new ComboBox<>();
-            speedSelector.getItems().addAll("Fast", "Medium", "Slow");
-            speedSelector.setValue(slectedSpeed);
+            speedSelector.getItems().addAll("Fast", "Medium", "Slow");  // Fügt die Geschwindigkeitsoptionen hinzu
+            speedSelector.setValue(slectedSpeed);  // Setzt die aktuelle Geschwindigkeit
             speedSelector.setStyle(
                     "-fx-background-color: #004d00;" +
                             "-fx-color: white;" +
                             "-fx-font-size: 14px;"
             );
             speedSelector.setOnAction(e -> {
-                play_sound(1);
-                slectedSpeed = speedSelector.getValue();
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                slectedSpeed = speedSelector.getValue();  // Speichert die ausgewählte Geschwindigkeit
+                // Setzt die entsprechende Geschwindigkeit
                 switch(speedSelector.getValue()) {
                     case "Fast":
                         speed = MovementSpeed.QUICK;
@@ -873,37 +988,41 @@ public class GUI extends GameApplication {
                 }
             });
 
+            // Erstellt den Steuerungs-Button
             Button btnControls = createSnakeButton("Controls");
             btnControls.setOnAction(e -> {
-                play_sound(1);
-                showControlsMenu();
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                showControlsMenu();  // Zeigt das Steuerungsmenü an
             });
 
+            // Erstellt den Zurück-Button
             Button btnBack = createSnakeButton("Back");
             btnBack.setOnAction(e -> {
-                play_sound(1);
-                showMainMenu();
+                play_sound(1);  // Spielt das Klick-Geräusch ab
+                showMainMenu();  // Zeigt das Hauptmenü an
             });
 
+            // Fügt alle Elemente zur optionsBox hinzu
             optionsBox.getChildren().addAll(
                     optionsTitle,
-                    createSeparator(),
+                    createSeparator(),  // Fügt einen Trennstrich ein
                     btnSound,
                     btnMusic,
                     btnControls,
-                    createSeparator(),
+                    createSeparator(),  // Fügt einen Trennstrich ein
                     gameSizeTitel,
                     sizeSelector,
                     speedGameTitel,
                     speedSelector,
-                    createSeparator(),
+                    createSeparator(),  // Fügt einen Trennstrich ein
                     btnBack
             );
 
-            // Position the options box higher up than the main menu
+            // Positioniert die optionsBox höher als das Hauptmenü
             optionsBox.setTranslateX(getAppWidth() / 2.0 - 150);
-            optionsBox.setTranslateY(getAppHeight() / 2.0 - 300); // Höher positioniert als das Hauptmenü
+            optionsBox.setTranslateY(getAppHeight() / 2.0 - 300);
 
+            // Fügt die optionsBox zum Hauptcontainer hinzu, falls sie noch nicht vorhanden ist
             if (!getContentRoot().getChildren().contains(optionsBox)) {
                 getContentRoot().getChildren().add(optionsBox);
             }
